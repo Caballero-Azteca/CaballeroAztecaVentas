@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="tipos">
+        <item>P3</item>
+        <item>Lista</item>
+        <item>P1</item>
+        <item>P2</item>
+        <item>P4</item>
+        <item>CCA</item>
+        <item>OTRO</item>
+    </string-array>
+</resources>

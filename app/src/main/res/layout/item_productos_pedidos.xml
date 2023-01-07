@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/Linear_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/cantidad_tv"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center|start"
+        android:layout_weight="1"
+        android:gravity="center|start"
+        android:text="CANTIDAD" />
+
+    <TextView
+        android:id="@+id/codigo_tv"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center|start"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="CODIGO" />
+
+    <TextView
+        android:id="@+id/descripcion_tv"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="2"
+        android:gravity="center|start"
+        android:text="DESCRIPCION" />
+
+    <TextView
+        android:id="@+id/precio_tv"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="$" />
+
+    <TextView
+        android:id="@+id/tipo_tv"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="L" />
+
+    <ImageButton
+        android:id="@+id/eliminar_ibtn"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center|end"
+        android:layout_weight="1"
+        app:srcCompat="@android:drawable/ic_delete" />
+</LinearLayout>
