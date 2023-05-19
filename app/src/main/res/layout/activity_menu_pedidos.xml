@@ -6,7 +6,7 @@
     android:layout_gravity="center"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:context=".Menu_pedidos">
+    tools:context=".ui.Menu_pedidos">
 
     <TextView
         android:id="@+id/cliente_view"

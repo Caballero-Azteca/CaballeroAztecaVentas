@@ -18,21 +18,21 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MailManager"
+        <activity android:name=".ui.MailManager"
             android:windowSoftInputMode="adjustPan"/>
         <activity
-            android:name=".EditarCliente"
+            android:name=".ui.EditarCliente"
             android:windowSoftInputMode="adjustPan" />
-        <activity android:name=".PdfViewer" />
-        <activity android:name=".QrScanner" />
+        <activity android:name=".ui.PdfViewer" />
+        <activity android:name=".ui.QrScanner" />
         <activity
-            android:name=".Agregar_producto"
+            android:name=".ui.Agregar_producto"
             android:windowSoftInputMode="adjustPan" />
-        <activity android:name=".Agregar_usuario"
+        <activity android:name=".ui.Agregar_usuario"
                   android:windowSoftInputMode="adjustPan"/>
-        <activity android:name=".Lista_usuarios" />
+        <activity android:name=".ui.Lista_usuarios" />
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -40,23 +40,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Pantalla_pedido_finalizado" />
-        <activity android:name=".Menu_final" />
+        <activity android:name=".ui.Pantalla_pedido_finalizado" />
+        <activity android:name=".ui.Menu_final" />
         <activity
-            android:name=".Menu_pedidos"
+            android:name=".ui.Menu_pedidos"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".Lista_clientes"
+            android:name=".ui.Lista_clientes"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".Agregar_cliente"
+            android:name=".ui.Agregar_cliente"
             android:windowSoftInputMode="adjustPan" />
-        <activity android:name=".Menu_marca" />
-        <activity android:name=".Marcas" />
+        <activity android:name=".ui.Menu_marca" />
+        <activity android:name=".ui.Marcas" />
         <activity
-            android:name=".Verificador_precio"
+            android:name=".ui.Verificador_precio"
             android:windowSoftInputMode="adjustPan" />
-        <activity android:name=".Login" />
+        <activity android:name=".ui.Login" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

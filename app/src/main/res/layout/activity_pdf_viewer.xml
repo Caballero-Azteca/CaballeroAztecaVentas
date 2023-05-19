@@ -6,7 +6,7 @@
     android:background="@color/cardview_dark_background"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:context=".PdfViewer">
+    tools:context=".ui.PdfViewer">
 
 
     <LinearLayout
