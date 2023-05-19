@@ -83,7 +83,7 @@ public class Login extends AppCompatActivity {
                 FirebaseDatabase.getInstance().setPersistenceEnabled(true);
                 isInitialized = true;
             }else {
-                Log.d("ATENCION-FIREBASE:","Already Initialized");
+                Log.d("ATENCION-FIREBASE:","Already Initialized.");
             }
         }catch (Exception e){
             e.printStackTrace();
