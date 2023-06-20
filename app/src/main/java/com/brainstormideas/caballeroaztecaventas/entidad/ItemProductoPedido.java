@@ -1,8 +1,10 @@
 package com.brainstormideas.caballeroaztecaventas.entidad;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.widget.ImageButton;
 
-public class ItemProductoPedido {
+public class ItemProductoPedido implements Parcelable {
 
     private String id;
     private String nombre;
@@ -21,6 +23,28 @@ public class ItemProductoPedido {
         this.tipo = tipo;
         this.btnEliminar = btnEliminar;
     }
+
+    protected ItemProductoPedido(Parcel in) {
+
+        id = in.readString();
+        nombre = in.readString();
+        marca = in.readString();
+        cantidad = in.readString();
+        precio = in.readString();
+        tipo = in.readString();
+    }
+
+    public static final Creator<ItemProductoPedido> CREATOR = new Creator<ItemProductoPedido>() {
+        @Override
+        public ItemProductoPedido createFromParcel(Parcel in) {
+            return new ItemProductoPedido(in);
+        }
+
+        @Override
+        public ItemProductoPedido[] newArray(int size) {
+            return new ItemProductoPedido[size];
+        }
+    };
 
     public ItemProductoPedido() {
 
@@ -74,11 +98,18 @@ public class ItemProductoPedido {
         this.tipo = tipo;
     }
 
-    public ImageButton getBtnEliminar() {
-        return btnEliminar;
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(nombre);
+        dest.writeString(marca);
+        dest.writeString(cantidad);
+        dest.writeString(precio);
+        dest.writeString(tipo);
     }
 
-    public void setBtnEliminar(ImageButton btnEliminar) {
-        this.btnEliminar = btnEliminar;
+    @Override
+    public int describeContents() {
+        return 0;
     }
 }

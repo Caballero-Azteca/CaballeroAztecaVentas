@@ -8,6 +8,13 @@
     android:padding="16dp"
     tools:context=".ui.Menu_pedidos">
 
+    <LinearLayout
+        android:id="@+id/lista_busqueda_productos"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:translationZ="1dp" />
+
     <TextView
         android:id="@+id/cliente_view"
         android:layout_width="match_parent"
@@ -86,7 +93,7 @@
         android:orientation="vertical">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/lista_productos"
+            android:id="@+id/productos_listados"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             tools:listitem="@layout/item_productos_pedidos" />
@@ -107,7 +114,8 @@
             android:gravity="center"
             android:hint="CANTIDAD"
             android:inputType="number"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:autofillHints="Cantidad" />
 
         <EditText
             android:id="@+id/codigo_tv"
@@ -118,7 +126,8 @@
             android:gravity="center"
             android:hint="CODIGO"
             android:inputType="textPostalAddress"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:autofillHints="Codigo" />
 
         <Spinner
             android:id="@+id/tipoSelector"

@@ -1,5 +1,7 @@
 package com.brainstormideas.caballeroaztecaventas.ui;
 
+import static com.brainstormideas.caballeroaztecaventas.ui.MainActivity.isInitialized;
+
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -26,9 +28,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.brainstormideas.caballeroaztecaventas.R;
+import com.brainstormideas.caballeroaztecaventas.entidad.Item;
 import com.brainstormideas.caballeroaztecaventas.ui.adapters.ControllerRecyclerViewAdapter;
 import com.brainstormideas.caballeroaztecaventas.ui.adapters.RecyclerViewAdapter;
-import com.brainstormideas.caballeroaztecaventas.entidad.Item;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -41,8 +43,6 @@ import com.google.firebase.database.ValueEventListener;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Objects;
-
-import static com.brainstormideas.caballeroaztecaventas.ui.Verificador_precio.isInitialized;
 
 public class Menu_marca extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
@@ -108,43 +108,27 @@ public class Menu_marca extends AppCompatActivity implements SearchView.OnQueryT
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
 
-        detalles_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (ControllerRecyclerViewAdapter.itemSeleccionado != null) {
-                    detallesDeProducto();
-                } else {
-                    Toast.makeText(getApplicationContext(), "Seleccione un articulo primero", Toast.LENGTH_LONG).show();
-                }
+        detalles_btn.setOnClickListener(v -> {
+            if (ControllerRecyclerViewAdapter.itemSeleccionado != null) {
+                detallesDeProducto();
+            } else {
+                Toast.makeText(getApplicationContext(), "Seleccione un articulo primero", Toast.LENGTH_LONG).show();
             }
         });
 
-        agregar_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (ControllerRecyclerViewAdapter.itemSeleccionado != null) {
-                    obtenerProducto();
-                    Toast.makeText(getApplicationContext(), "Articulo seleccionado: " + ControllerRecyclerViewAdapter.itemSeleccionado.getTitulo(), Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(getApplicationContext(), "Seleccione un articulo primero", Toast.LENGTH_LONG).show();
-                }
+        agregar_btn.setOnClickListener(v -> {
+            if (ControllerRecyclerViewAdapter.itemSeleccionado != null) {
+                obtenerProducto();
+                Toast.makeText(getApplicationContext(), "Articulo seleccionado: " + ControllerRecyclerViewAdapter.itemSeleccionado.getTitulo(), Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(getApplicationContext(), "Seleccione un articulo primero", Toast.LENGTH_LONG).show();
             }
         });
 
-        direct_home_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                goHome();
-            }
-        });
+        direct_home_btn.setOnClickListener(v -> goHome());
 
 
-        home_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                home();
-            }
-        });
+        home_btn.setOnClickListener(v -> home());
 
         if (ruta.equals("verificadorPrecio")) {
             agregar_btn.setVisibility(View.INVISIBLE);
@@ -153,19 +137,19 @@ public class Menu_marca extends AppCompatActivity implements SearchView.OnQueryT
     }
 
     private void initializedFirebaseService() {
-        try{
-            if(!isInitialized){
+        try {
+            if (!isInitialized) {
                 FirebaseDatabase.getInstance().setPersistenceEnabled(true);
                 isInitialized = true;
-            }else {
-                Log.d("ATENCION-FIREBASE:","Already Initialized");
+            } else {
+                Log.d("ATENCION-FIREBASE:", "Already Initialized");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void goHome(){
+    private void goHome() {
         Intent i = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(i);
     }
@@ -186,42 +170,42 @@ public class Menu_marca extends AppCompatActivity implements SearchView.OnQueryT
                                 && data.child("p2").getValue() != null && data.child("p3").getValue() != null
                                 && data.child("p4").getValue() != null) {
 
-                                DecimalFormat df = new DecimalFormat("#.00");
+                            DecimalFormat df = new DecimalFormat("#.00");
 
-                                String id = Objects.requireNonNull(data.child("id").getValue()).toString();
-                                String nombre = Objects.requireNonNull(data.child("nombre").getValue()).toString();
-                                String marca = Objects.requireNonNull(data.child("marca").getValue()).toString();
+                            String id = Objects.requireNonNull(data.child("id").getValue()).toString();
+                            String nombre = Objects.requireNonNull(data.child("nombre").getValue()).toString();
+                            String marca = Objects.requireNonNull(data.child("marca").getValue()).toString();
 
-                                double lista = 0.0;
-                                double cca = 0.0;
-                                double p1 = 0.0;
-                                double p2 = 0.0;
-                                double p3 = 0.0;
-                                double p4 = 0.0;
+                            double lista = 0.0;
+                            double cca = 0.0;
+                            double p1 = 0.0;
+                            double p2 = 0.0;
+                            double p3 = 0.0;
+                            double p4 = 0.0;
 
-                                if(marcaIngresada.equals(marca)){
+                            if (marcaIngresada.equals(marca)) {
 
-                                    if(data.child("lista").getValue() != null
-                                            && data.child("cca").getValue() != null && data.child("p1").getValue() != null
-                                            && data.child("p2").getValue() != null && data.child("p3").getValue() != null
-                                            && data.child("p4").getValue() != null){
+                                if (data.child("lista").getValue() != null
+                                        && data.child("cca").getValue() != null && data.child("p1").getValue() != null
+                                        && data.child("p2").getValue() != null && data.child("p3").getValue() != null
+                                        && data.child("p4").getValue() != null) {
 
-                                        lista = Double.parseDouble(Objects.requireNonNull(data.child("lista").getValue()).toString());
-                                        cca = Double.parseDouble(Objects.requireNonNull(data.child("cca").getValue()).toString());
-                                        p1 = Double.parseDouble(Objects.requireNonNull(data.child("p1").getValue()).toString());
-                                        p2 = Double.parseDouble(Objects.requireNonNull(data.child("p2").getValue()).toString());
-                                        p3 = Double.parseDouble(Objects.requireNonNull(data.child("p3").getValue()).toString());
-                                        p4 = Double.parseDouble(Objects.requireNonNull(data.child("p4").getValue()).toString());
-                                    }
-
-                                    Item item = new Item(id, nombre, marca, df.format(lista),
-                                            df.format(cca), df.format(p1),df.format(p2),
-                                            df.format(p3), df.format(p4), null);
-
-                                    nombresProductos.add(item);
-                                    adapter.notifyDataSetChanged();
-
+                                    lista = Double.parseDouble(Objects.requireNonNull(data.child("lista").getValue()).toString());
+                                    cca = Double.parseDouble(Objects.requireNonNull(data.child("cca").getValue()).toString());
+                                    p1 = Double.parseDouble(Objects.requireNonNull(data.child("p1").getValue()).toString());
+                                    p2 = Double.parseDouble(Objects.requireNonNull(data.child("p2").getValue()).toString());
+                                    p3 = Double.parseDouble(Objects.requireNonNull(data.child("p3").getValue()).toString());
+                                    p4 = Double.parseDouble(Objects.requireNonNull(data.child("p4").getValue()).toString());
                                 }
+
+                                Item item = new Item(id, nombre, marca, df.format(lista),
+                                        df.format(cca), df.format(p1), df.format(p2),
+                                        df.format(p3), df.format(p4), null);
+
+                                nombresProductos.add(item);
+                                adapter.notifyDataSetChanged();
+
+                            }
                         }
                     }
 
@@ -381,7 +365,6 @@ public class Menu_marca extends AppCompatActivity implements SearchView.OnQueryT
         }
         return listaFiltrada;
     }
-
 
 
     @Override

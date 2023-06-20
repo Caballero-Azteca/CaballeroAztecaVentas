@@ -1,8 +1,18 @@
 package com.brainstormideas.caballeroaztecaventas.data.models;
 
+
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "clientes")
 public class Cliente {
 
-    private String id;
+    @PrimaryKey
+    @NonNull
+    private Long id;
+    @NonNull
+    private String code;
     private String razon;
     private String rfc;
     private String municipio;
@@ -18,11 +28,13 @@ public class Cliente {
     private String agenteVenta;
     private String agenteCobro;
 
-    public Cliente(String id, String razon, String rfc, String municipio, String estado, String calle,
-                   String colonia, String numeroExterior, String numeroInterior, String cp,
-                   String telefono, String email, String ruta, String agenteVenta, String agenteCobro) {
+    public Cliente(@NonNull Long id, @NonNull String code, String razon, String rfc, String municipio,
+                   String estado, String calle, String colonia, String numeroExterior, String numeroInterior,
+                   String cp, String telefono, String email, String ruta, String agenteVenta,
+                   String agenteCobro) {
 
         this.id = id;
+        this.code = code;
         this.razon = razon;
         this.rfc = rfc;
         this.municipio = municipio;
@@ -41,14 +53,26 @@ public class Cliente {
 
     public Cliente() {
 
+        id = null;
+        code = null;
     }
 
-    public String getId() {
+    @NonNull
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(@NonNull Long id) {
         this.id = id;
+    }
+
+    @NonNull
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(@NonNull String code) {
+        this.code = code;
     }
 
     public String getRazon() {
@@ -163,10 +187,12 @@ public class Cliente {
         this.agenteCobro = agenteCobro;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "Cliente{" +
-                "id='" + id + '\'' +
+                "id=" + id +
+                ", code='" + code + '\'' +
                 ", razon='" + razon + '\'' +
                 ", rfc='" + rfc + '\'' +
                 ", municipio='" + municipio + '\'' +

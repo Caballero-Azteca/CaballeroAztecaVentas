@@ -1,5 +1,7 @@
 package com.brainstormideas.caballeroaztecaventas.ui;
 
+import static com.brainstormideas.caballeroaztecaventas.ui.MainActivity.isInitialized;
+
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -30,8 +32,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
-import static com.brainstormideas.caballeroaztecaventas.ui.Verificador_precio.isInitialized;
 
 public class Login extends AppCompatActivity {
 
@@ -67,25 +67,20 @@ public class Login extends AppCompatActivity {
 
         dbUsuariosReferencia = FirebaseDatabase.getInstance().getReference().child("Usuario");
 
-        enter_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                loguear();
-            }
-        });
+        enter_button.setOnClickListener(view -> loguear());
 
         solicitarPermisos();
     }
 
     private void initializedFirebaseService() {
-        try{
-            if(!isInitialized){
+        try {
+            if (!isInitialized) {
                 FirebaseDatabase.getInstance().setPersistenceEnabled(true);
                 isInitialized = true;
-            }else {
-                Log.d("ATENCION-FIREBASE:","Already Initialized.");
+            } else {
+                Log.d("ATENCION-FIREBASE:", "Already Initialized.");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -95,18 +90,8 @@ public class Login extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Salir");
         builder.setMessage("Desea salir de la aplicacion");
-        builder.setPositiveButton("SI", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                finishAffinity();
-            }
-        });
-        builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
-            }
-        });
+        builder.setPositiveButton("SI", (dialogInterface, i) -> finishAffinity());
+        builder.setNegativeButton("NO", (dialogInterface, i) -> {});
         builder.show();
     }
 
@@ -141,7 +126,7 @@ public class Login extends AppCompatActivity {
 
             session.createLoginSession("admin", Pedido.correoPrincipal);
             session.setName("ADMINISTRADOR");
-            Vendedor vendedor = new Vendedor("0", "ADMINISTRADOR", "admin","caballero2020", "3333333333", Pedido.correoPrincipal);
+            Vendedor vendedor = new Vendedor(0, "ADMINISTRADOR", "admin", "caballero2020", "3333333333", Pedido.correoPrincipal);
             Pedido.setVendedor(vendedor);
 
             Intent i = new Intent(getApplicationContext(), MainActivity.class);
@@ -164,34 +149,31 @@ public class Login extends AppCompatActivity {
         progressDialog.show();
 
 
-        mAuth.signInWithEmailAndPassword(email, pass).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()) {
-                    FirebaseUser user = mAuth.getCurrentUser();
-                    assert user != null;
-                    if (user.isEmailVerified()) {
-                        Toast.makeText(getApplicationContext(), "Inicio de sesión exitoso. Bienvenido:" + user.getDisplayName(), Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Este usuario no ha sido verificado.", Toast.LENGTH_SHORT).show();
-                        progressDialog.dismiss();
-                        return;
-                    }
-
+        mAuth.signInWithEmailAndPassword(email, pass).addOnCompleteListener(this, task -> {
+            if (task.isSuccessful()) {
+                FirebaseUser user = mAuth.getCurrentUser();
+                assert user != null;
+                if (user.isEmailVerified()) {
+                    Toast.makeText(getApplicationContext(), "Inicio de sesión exitoso. Bienvenido:" + user.getDisplayName(), Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(getApplicationContext(), "Inicio de sesión erroneo.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Este usuario no ha sido verificado.", Toast.LENGTH_SHORT).show();
                     progressDialog.dismiss();
                     return;
                 }
 
+            } else {
+                Toast.makeText(getApplicationContext(), "Inicio de sesión erroneo.", Toast.LENGTH_SHORT).show();
                 progressDialog.dismiss();
-                session.createLoginSession(mAuth.getCurrentUser().getDisplayName(),
-                        mAuth.getCurrentUser().getEmail());
-                session.setName(mAuth.getCurrentUser().getDisplayName());
-                Intent i = new Intent(getApplicationContext(), MainActivity.class);
-                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(i);
+                return;
             }
+
+            progressDialog.dismiss();
+            session.createLoginSession(mAuth.getCurrentUser().getDisplayName(),
+                    mAuth.getCurrentUser().getEmail());
+            session.setName(mAuth.getCurrentUser().getDisplayName());
+            Intent i = new Intent(getApplicationContext(), MainActivity.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
         });
 
     }
@@ -207,23 +189,16 @@ public class Login extends AppCompatActivity {
         }
 
         mAuth.sendPasswordResetEmail(email)
-                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()) {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(Login.this);
-                                builder.setCancelable(false);
-                                builder.setTitle("Cambio de contraseña.");
-                                builder.setMessage("Caballero Azteca Ventas. \n\nSe ha enviado un correo electrónico a su cuenta con el motivo de realizar un cambio de contraseña. Gracias!");
-                                builder.setNeutralButton("Entendido", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                    }
-                                });
-                                builder.show();
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(Login.this);
+                        builder.setCancelable(false);
+                        builder.setTitle("Cambio de contraseña.");
+                        builder.setMessage("Caballero Azteca Ventas. \n\nSe ha enviado un correo electrónico a su cuenta con el motivo de realizar un cambio de contraseña. Gracias!");
+                        builder.setNeutralButton("Entendido", (dialogInterface, i) -> {});
+                        builder.show();
 
-                            }
-                        }
+                    }
                 });
     }
 

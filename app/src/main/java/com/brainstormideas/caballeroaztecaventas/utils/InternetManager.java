@@ -9,11 +9,11 @@ public class InternetManager {
 
     Context context;
 
-    public InternetManager(Context context){
+    public InternetManager(Context context) {
         this.context = context;
     }
 
-    public boolean isInternetAvaible(){
+    public boolean isInternetAvaible() {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         assert connectivityManager != null;
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();

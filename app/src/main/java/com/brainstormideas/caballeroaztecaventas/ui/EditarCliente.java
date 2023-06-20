@@ -1,5 +1,7 @@
 package com.brainstormideas.caballeroaztecaventas.ui;
 
+import static com.brainstormideas.caballeroaztecaventas.ui.MainActivity.isInitialized;
+
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,8 +16,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.brainstormideas.caballeroaztecaventas.R;
-import com.brainstormideas.caballeroaztecaventas.ui.adapters.ControllerRecyclerViewAdapter;
 import com.brainstormideas.caballeroaztecaventas.data.models.Pedido;
+import com.brainstormideas.caballeroaztecaventas.ui.adapters.ControllerRecyclerViewAdapter;
 import com.brainstormideas.caballeroaztecaventas.utils.Tools;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -27,7 +29,6 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.brainstormideas.caballeroaztecaventas.ui.Verificador_precio.isInitialized;
 
 public class EditarCliente extends AppCompatActivity {
 
@@ -74,32 +75,22 @@ public class EditarCliente extends AppCompatActivity {
         r_correo_txt = findViewById(R.id.r_correo_txt);
         cargarCliente();
         home_button = findViewById(R.id.home_button);
-        home_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                home();
-            }
-        });
+        home_button.setOnClickListener(view -> home());
         guardar = findViewById(R.id.guardar);
-        guardar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                guardarCambios();
-            }
-        });
+        guardar.setOnClickListener(view -> guardarCambios());
 
         obtenerCliente();
     }
 
     private void initializedFirebaseService() {
-        try{
-            if(!isInitialized){
+        try {
+            if (!isInitialized) {
                 FirebaseDatabase.getInstance().setPersistenceEnabled(true);
                 isInitialized = true;
-            }else {
-                Log.d("ATENCION-FIREBASE:","Already Initialized");
+            } else {
+                Log.d("ATENCION-FIREBASE:", "Already Initialized");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

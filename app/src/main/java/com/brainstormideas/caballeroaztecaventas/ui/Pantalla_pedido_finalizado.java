@@ -1,5 +1,7 @@
 package com.brainstormideas.caballeroaztecaventas.ui;
 
+import static com.brainstormideas.caballeroaztecaventas.ui.MainActivity.isInitialized;
+
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,8 +19,6 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import static com.brainstormideas.caballeroaztecaventas.ui.Verificador_precio.isInitialized;
-
 public class Pantalla_pedido_finalizado extends AppCompatActivity {
 
     Button finalizar_btn;
@@ -27,8 +27,6 @@ public class Pantalla_pedido_finalizado extends AppCompatActivity {
     String tipoCliente;
 
     DatabaseReference dbUsuariosReferencia;
-    FirebaseUser user;
-    private final FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,30 +44,20 @@ public class Pantalla_pedido_finalizado extends AppCompatActivity {
         finalizar_btn = findViewById(R.id.finalizar_btn);
         otra_vez_btn = findViewById(R.id.otra_vez_btn);
 
-        finalizar_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                home();
-            }
-        });
-        otra_vez_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                atras();
-            }
-        });
+        finalizar_btn.setOnClickListener(v -> home());
+        otra_vez_btn.setOnClickListener(v -> atras());
 
     }
 
     private void initializedFirebaseService() {
-        try{
-            if(!isInitialized){
+        try {
+            if (!isInitialized) {
                 FirebaseDatabase.getInstance().setPersistenceEnabled(true);
                 isInitialized = true;
-            }else {
-                Log.d("ATENCION-FIREBASE:","Already Initialized");
+            } else {
+                Log.d("ATENCION-FIREBASE:", "Already Initialized");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -78,24 +66,16 @@ public class Pantalla_pedido_finalizado extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Ir atras.");
         builder.setMessage("¿Seguro que desea realizar nuevamente el pedido o quizás algún cambio?");
-        builder.setPositiveButton("Atras", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                Intent intent = new Intent(getApplicationContext(), Menu_final.class);
-                intent.putExtra("tipoCliente", "cliente");
-                intent.putExtra("candadoModificar", getIntent().getExtras().getBoolean("candadoModificar", false));
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
-                        Intent.FLAG_ACTIVITY_CLEAR_TASK |
-                        Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-            }
+        builder.setPositiveButton("Atras", (dialogInterface, i) -> {
+            Intent intent = new Intent(getApplicationContext(), Menu_final.class);
+            intent.putExtra("tipoCliente", "cliente");
+            intent.putExtra("candadoModificar", getIntent().getExtras().getBoolean("candadoModificar", false));
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                    Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
         });
-        builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.dismiss();
-            }
-        });
+        builder.setNegativeButton("Cancelar", (dialogInterface, i) -> dialogInterface.dismiss());
         builder.show();
     }
 
@@ -104,22 +84,14 @@ public class Pantalla_pedido_finalizado extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Ir al menú principal");
         builder.setMessage("¿Seguro que desea ir al menú principal? (Su pedido se cerrara).");
-        builder.setPositiveButton("Ir al menú principal", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
-                        Intent.FLAG_ACTIVITY_CLEAR_TASK |
-                        Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-            }
+        builder.setPositiveButton("Ir al menú principal", (dialogInterface, i) -> {
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                    Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
         });
-        builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.dismiss();
-            }
-        });
+        builder.setNegativeButton("Cancelar", (dialogInterface, i) -> dialogInterface.dismiss());
         builder.show();
 
     }

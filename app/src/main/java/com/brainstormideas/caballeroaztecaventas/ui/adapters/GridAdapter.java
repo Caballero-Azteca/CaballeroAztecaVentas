@@ -13,8 +13,8 @@ import java.util.ArrayList;
 
 public class GridAdapter extends BaseAdapter {
 
-    private Context context;
-    private ArrayList<String> arrayList;
+    private final Context context;
+    private final ArrayList<String> arrayList;
 
     public GridAdapter(Context context, ArrayList<String> arrayList) {
         this.context = context;
@@ -43,7 +43,7 @@ public class GridAdapter extends BaseAdapter {
             convertView = layoutInflater.inflate(R.layout.item_grid, null);
 
         }
-        TextView titulo_tv = (TextView) convertView.findViewById(R.id.marca_item_tv);
+        TextView titulo_tv = convertView.findViewById(R.id.marca_item_tv);
         titulo_tv.setText(arrayList.get(position));
         return convertView;
     }

@@ -1,5 +1,7 @@
 package com.brainstormideas.caballeroaztecaventas.ui;
 
+import static com.brainstormideas.caballeroaztecaventas.ui.MainActivity.isInitialized;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,8 +15,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.brainstormideas.caballeroaztecaventas.R;
-import com.brainstormideas.caballeroaztecaventas.ui.adapters.RecyclerViewUsuariosAdapter;
 import com.brainstormideas.caballeroaztecaventas.entidad.ItemUsuario;
+import com.brainstormideas.caballeroaztecaventas.ui.adapters.RecyclerViewUsuariosAdapter;
 import com.brainstormideas.caballeroaztecaventas.utils.SessionManager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.FirebaseApp;
@@ -27,8 +29,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-
-import static com.brainstormideas.caballeroaztecaventas.ui.Verificador_precio.isInitialized;
 
 public class Lista_usuarios extends AppCompatActivity {
 
@@ -67,20 +67,9 @@ public class Lista_usuarios extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         cliente_nuevo_button = findViewById(R.id.agregar_usuario_btn);
-        cliente_nuevo_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                irAgregarUsuario();
-            }
-        });
+        cliente_nuevo_button.setOnClickListener(v -> irAgregarUsuario());
         atrasBtn = findViewById(R.id.atrasBtn);
-        atrasBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                volver();
-            }
-
-        });
+        atrasBtn.setOnClickListener(v -> volver());
 
         firebaseDatabase = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference();
@@ -89,14 +78,14 @@ public class Lista_usuarios extends AppCompatActivity {
     }
 
     private void initializedFirebaseService() {
-        try{
-            if(!isInitialized){
+        try {
+            if (!isInitialized) {
                 FirebaseDatabase.getInstance().setPersistenceEnabled(true);
                 isInitialized = true;
-            }else {
-                Log.d("ATENCION-FIREBASE:","Already Initialized");
+            } else {
+                Log.d("ATENCION-FIREBASE:", "Already Initialized");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -158,7 +147,7 @@ public class Lista_usuarios extends AppCompatActivity {
 
     }
 
-    private  void refrescar(){
+    private void refrescar() {
         Intent i = new Intent(Lista_usuarios.this, Lista_usuarios.class);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(i);

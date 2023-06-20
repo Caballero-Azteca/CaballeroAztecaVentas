@@ -1,5 +1,7 @@
 package com.brainstormideas.caballeroaztecaventas.ui;
 
+import static com.brainstormideas.caballeroaztecaventas.ui.MainActivity.isInitialized;
+
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -30,8 +32,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Objects;
-
-import static com.brainstormideas.caballeroaztecaventas.ui.Verificador_precio.isInitialized;
 
 public class Agregar_usuario extends AppCompatActivity {
 
@@ -86,58 +86,45 @@ public class Agregar_usuario extends AppCompatActivity {
         atrasUsuario_btn = findViewById(R.id.atrasUsuario_btn);
         permisos_rg = findViewById(R.id.permisos_rg);
 
-        permisos_rg.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                switch (checkedId){
-                    case R.id.administrador_rb:
-                        permisos = "administrador";
-                        break;
-                    case R.id.almacen_rb:
-                        permisos = "almacen";
-                        break;
-                    case R.id.chofer_rb:
-                        permisos = "chofer";
-                        break;
-                    case R.id.facturacion_rb:
-                        permisos = "facturacion";
-                        break;
-                    case R.id.superusuario_rb:
-                        permisos = "superusuario";
-                        break;
-                    case R.id.vendedor_rb:
-                        permisos = "vendedor";
-                        break;
-                }
+        permisos_rg.setOnCheckedChangeListener((group, checkedId) -> {
+            switch (checkedId) {
+                case R.id.administrador_rb:
+                    permisos = "administrador";
+                    break;
+                case R.id.almacen_rb:
+                    permisos = "almacen";
+                    break;
+                case R.id.chofer_rb:
+                    permisos = "chofer";
+                    break;
+                case R.id.facturacion_rb:
+                    permisos = "facturacion";
+                    break;
+                case R.id.superusuario_rb:
+                    permisos = "superusuario";
+                    break;
+                case R.id.vendedor_rb:
+                    permisos = "vendedor";
+                    break;
             }
         });
 
-        agregarUsuario_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                registrarUsuario();
-            }
-        });
-        atrasUsuario_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                volver();
-            }
-        });
+        agregarUsuario_btn.setOnClickListener(v -> registrarUsuario());
+        atrasUsuario_btn.setOnClickListener(v -> volver());
 
         obtenerNumeroDeUsuarios();
 
     }
 
     private void initializedFirebaseService() {
-        try{
-            if(!isInitialized){
+        try {
+            if (!isInitialized) {
                 FirebaseDatabase.getInstance().setPersistenceEnabled(true);
                 isInitialized = true;
-            }else {
-                Log.d("ATENCION-FIREBASE:","Already Initialized");
+            } else {
+                Log.d("ATENCION-FIREBASE:", "Already Initialized");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -180,7 +167,7 @@ public class Agregar_usuario extends AppCompatActivity {
             return;
         }
 
-        if(permisos.isEmpty()){
+        if (permisos.isEmpty()) {
             Toast.makeText(getApplicationContext(), "Debe seleccionar los permisos para el usuario", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -226,7 +213,6 @@ public class Agregar_usuario extends AppCompatActivity {
                         builder.show();
 
 
-
                     } else {
                         if (task.getException() instanceof FirebaseAuthUserCollisionException) {
                             Toast.makeText(getApplicationContext(), "Ya esta registrado una cuenta con este correo.",
@@ -245,8 +231,8 @@ public class Agregar_usuario extends AppCompatActivity {
                 }
             });
 
-        }  catch (Exception e){
-            Toast.makeText(getApplicationContext(), "No se pudo agregar al usuario. Error: "+ e.toString(), Toast.LENGTH_LONG);
+        } catch (Exception e) {
+            Toast.makeText(getApplicationContext(), "No se pudo agregar al usuario. Error: " + e, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -268,10 +254,10 @@ public class Agregar_usuario extends AppCompatActivity {
                         if (data.child("id").getValue() != null && data.child("nombre").getValue() != null && data.child("usuario").getValue() != null && data.child("telefono").getValue() != null &&
                                 data.child("email").getValue() != null && data.child("password").getValue() != null) {
 
-                                actual = Long.parseLong(Objects.requireNonNull(data.child("id").getValue()).toString());
-                                if(actual > mayor){
-                                    mayor = actual;
-                                }
+                            actual = Long.parseLong(Objects.requireNonNull(data.child("id").getValue()).toString());
+                            if (actual > mayor) {
+                                mayor = actual;
+                            }
                         }
                         numeroVendedores = (int) mayor;
                     }

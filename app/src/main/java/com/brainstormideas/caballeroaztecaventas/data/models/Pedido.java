@@ -57,9 +57,13 @@ public class Pedido {
         editor.commit();
     }
 
-    public static String getTipo(){return tipo;}
+    public static String getTipo() {
+        return tipo;
+    }
 
-    public static void setTipo(String tipo){Pedido.tipo = tipo;}
+    public static void setTipo(String tipo) {
+        Pedido.tipo = tipo;
+    }
 
     public static String getFolio() {
         return folio;

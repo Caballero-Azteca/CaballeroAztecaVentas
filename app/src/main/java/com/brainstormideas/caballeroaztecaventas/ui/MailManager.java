@@ -1,8 +1,5 @@
 package com.brainstormideas.caballeroaztecaventas.ui;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,6 +8,9 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.brainstormideas.caballeroaztecaventas.R;
 import com.brainstormideas.caballeroaztecaventas.utils.SessionManager;
@@ -67,7 +67,7 @@ public class MailManager extends AppCompatActivity {
 
     }
 
-    public void actualizarCorreos(){
+    public void actualizarCorreos() {
 
         String almacen = almacenMail_etx.getText().toString().trim();
         String compras = comprasMail_etx.getText().toString().trim();
@@ -87,7 +87,7 @@ public class MailManager extends AppCompatActivity {
 
     }
 
-    private void obtenerCorreosActuales(){
+    private void obtenerCorreosActuales() {
 
         String almacen = sessionManager.getAlmacenEmail();
         String compras = sessionManager.getComprasEmail();
@@ -105,7 +105,7 @@ public class MailManager extends AppCompatActivity {
 
     }
 
-    private void salir(){
+    private void salir() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Atención");
         builder.setMessage("¿Desea regresar al menu principal?");

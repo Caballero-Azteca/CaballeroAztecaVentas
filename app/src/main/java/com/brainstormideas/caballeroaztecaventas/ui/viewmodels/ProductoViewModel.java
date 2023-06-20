@@ -11,8 +11,9 @@ import com.brainstormideas.caballeroaztecaventas.data.repository.ProductoReposit
 import java.util.List;
 
 public class ProductoViewModel extends ViewModel {
-    private ProductoRepository productoRepository;
-    private LiveData<List<Producto>> productos;
+
+    private final ProductoRepository productoRepository;
+    private final LiveData<List<Producto>> productos;
 
     public ProductoViewModel(Context context) {
         productoRepository = new ProductoRepository(context);
@@ -21,6 +22,10 @@ public class ProductoViewModel extends ViewModel {
 
     public LiveData<List<Producto>> getProductos() {
         return productos;
+    }
+
+    public LiveData<Producto> getProducto(String productId) {
+        return productoRepository.getProducto(productId);
     }
 
     public void insertProducto(Producto producto) {

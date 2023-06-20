@@ -1,5 +1,7 @@
 package com.brainstormideas.caballeroaztecaventas.ui;
 
+import static com.brainstormideas.caballeroaztecaventas.ui.MainActivity.isInitialized;
+
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -11,6 +13,10 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -19,6 +25,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,19 +35,26 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.MenuItemCompat;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.brainstormideas.caballeroaztecaventas.R;
-import com.brainstormideas.caballeroaztecaventas.ui.adapters.RecyclerViewProductosPedidoAdapter;
-import com.brainstormideas.caballeroaztecaventas.entidad.ItemProductoPedido;
 import com.brainstormideas.caballeroaztecaventas.data.models.Cliente;
 import com.brainstormideas.caballeroaztecaventas.data.models.Pedido;
+import com.brainstormideas.caballeroaztecaventas.data.models.Producto;
 import com.brainstormideas.caballeroaztecaventas.data.models.Vendedor;
+import com.brainstormideas.caballeroaztecaventas.entidad.Item;
+import com.brainstormideas.caballeroaztecaventas.entidad.ItemProductoPedido;
+import com.brainstormideas.caballeroaztecaventas.managers.PedidoManager;
+import com.brainstormideas.caballeroaztecaventas.ui.adapters.ControllerRecyclerViewAdapter;
+import com.brainstormideas.caballeroaztecaventas.ui.adapters.RecyclerViewAdapter;
+import com.brainstormideas.caballeroaztecaventas.ui.adapters.RecyclerViewProductosPedidoAdapter;
+import com.brainstormideas.caballeroaztecaventas.ui.viewmodels.ProductoViewModel;
+import com.brainstormideas.caballeroaztecaventas.ui.viewmodels.VendedorViewModel;
+import com.brainstormideas.caballeroaztecaventas.utils.InternetManager;
 import com.brainstormideas.caballeroaztecaventas.utils.SessionManager;
-import com.brainstormideas.caballeroaztecaventas.utils.Tools;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -47,11 +63,12 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
-import static com.brainstormideas.caballeroaztecaventas.ui.Verificador_precio.isInitialized;
-
-public class Menu_pedidos extends AppCompatActivity {
+public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
     ImageButton home_button;
     TextView cliente_view;
@@ -66,8 +83,8 @@ public class Menu_pedidos extends AppCompatActivity {
     Button finalizar_pedido;
 
     RecyclerViewProductosPedidoAdapter adapter;
-    RecyclerView.LayoutManager manager;
     RecyclerView recyclerView;
+    RecyclerView.LayoutManager manager;
 
     DatabaseReference dbProductosReferencia;
     DatabaseReference dbVendedoresReferencia;
@@ -90,10 +107,22 @@ public class Menu_pedidos extends AppCompatActivity {
 
     String vendedorActual;
 
-    FirebaseUser user;
-    private final FirebaseAuth mAuth = FirebaseAuth.getInstance();
-
     ProgressDialog progressDialog;
+
+    private ProductoViewModel productoViewModel;
+
+    private RecyclerView recyclerViewBusqueda;
+    private RecyclerViewAdapter adapterBusqueda;
+    private RecyclerView.LayoutManager managerBusqueda;
+    private LinearLayout container;
+
+    private ProgressBar progressBar;
+
+    List<Item> listaProductosBusqueda = new ArrayList<>();
+
+    private InternetManager internetManager;
+
+    private VendedorViewModel vendedorViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,7 +132,68 @@ public class Menu_pedidos extends AppCompatActivity {
         vendedor = null;
         pedido = 0;
 
+        sessionManager = new SessionManager(this);
+        internetManager = new InternetManager(this);
+
+        this.setTitle("Buscar producto");
+
         initializedFirebaseService();
+
+        LayoutInflater inflater = getLayoutInflater();
+        View inflatedView = inflater.inflate(R.layout.products_result, null);
+
+        container = findViewById(R.id.lista_busqueda_productos);
+        container.addView(inflatedView);
+
+        // Recyclerview de busqueda de productos
+        managerBusqueda = new LinearLayoutManager(container.getContext());
+
+        recyclerViewBusqueda = container.findViewById(R.id.productos_busqueda);
+        recyclerViewBusqueda.setLayoutManager(managerBusqueda);
+        adapterBusqueda = new RecyclerViewAdapter(this, listaProductosBusqueda);
+        recyclerViewBusqueda.setAdapter(adapterBusqueda);
+        container.setVisibility(View.GONE);
+
+        progressBar = container.findViewById(R.id.progressBar);
+
+        // Load Products with ViewModel
+        productoViewModel = new ProductoViewModel(this);
+        productoViewModel.getProductos().observe(this, productos -> {
+            for (Producto producto : productos) {
+
+                double lista;
+                double cca;
+                double p1;
+                double p2;
+                double p3;
+                double p4;
+
+                DecimalFormat df = new DecimalFormat("#.00");
+
+                lista = producto.getLista();
+                cca = producto.getCca();
+                p1 = producto.getP1();
+                p2 = producto.getP2();
+                p3 = producto.getP3();
+                p4 = producto.getP4();
+
+                Item item = new Item(producto.getCode(), producto.getNombre(),
+                        producto.getMarca(), df.format(lista),
+                        df.format(cca), df.format(p1), df.format(p2),
+                        df.format(p3), df.format(p4), null);
+                listaProductosBusqueda.add(item);
+            }
+            progressBar.setVisibility(View.GONE);
+            adapterBusqueda.notifyDataSetChanged();
+        });
+
+        // Recyclerview de productos agregados
+
+        manager = new LinearLayoutManager(this);
+        recyclerView = findViewById(R.id.productos_listados);
+        recyclerView.setLayoutManager(manager);
+        adapter = new RecyclerViewProductosPedidoAdapter(this, Pedido.getListaDeProductos());
+        recyclerView.setAdapter(adapter);
 
         tipoCliente = getIntent().getExtras().get("tipoCliente").toString();
         seleccionable = getIntent().getBooleanExtra("seleccionable", false);
@@ -114,10 +204,15 @@ public class Menu_pedidos extends AppCompatActivity {
         dbFoliosReferencia = FirebaseDatabase.getInstance().getReference().child("Folio");
         dbCotizacionesReferencia = FirebaseDatabase.getInstance().getReference().child("Cotizacion");
 
-        sessionManager = new SessionManager(this);
-
         vendedorActual = sessionManager.getUsuario();
-        obtenerVendedor();
+        vendedorViewModel = new VendedorViewModel(this);
+        vendedorViewModel.getVendedor(sessionManager.getEmail()).observe(this, vendedorObtained -> {
+            vendedor = vendedorObtained;
+            System.out.println("USUARIO ACTUAL:       " + vendedor.getUsuario());
+            if (vendedor != null) {
+                obtenerFolio();
+            }
+        });
 
         cliente_view = findViewById(R.id.cliente_view);
         if (obtenerCliente() != null) {
@@ -133,23 +228,15 @@ public class Menu_pedidos extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 tipoSeleccionado = tipoSelector.getSelectedItem().toString();
-                if(tipoSeleccionado.equals("OTRO")){
+                if (tipoSeleccionado.equals("OTRO")) {
                     precioManual();
                 }
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
             }
-
         });
-
-        recyclerView = findViewById(R.id.lista_productos);
-        manager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(manager);
-        adapter = new RecyclerViewProductosPedidoAdapter(this, Pedido.getListaDeProductos());
-        recyclerView.setAdapter(adapter);
 
         home_button = findViewById(R.id.home_button);
         home_button.setOnClickListener(new View.OnClickListener() {
@@ -164,50 +251,31 @@ public class Menu_pedidos extends AppCompatActivity {
         cantidad_tv = findViewById(R.id.cantidad_tv);
         agregar_btn = findViewById(R.id.agregar_btn);
         marcas_btn = findViewById(R.id.marcas_btn);
-        marcas_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(getApplicationContext(), Marcas.class);
-                i.putExtra("ruta", "MenuPedidos");
-                i.putExtra("tipoCliente", tipoCliente);
-                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
-                        Intent.FLAG_ACTIVITY_CLEAR_TASK |
-                        Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(i);
-            }
+        marcas_btn.setOnClickListener(v -> {
+            Intent i = new Intent(getApplicationContext(), Marcas.class);
+            i.putExtra("ruta", "MenuPedidos");
+            i.putExtra("tipoCliente", tipoCliente);
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                    Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
         });
 
         if (seleccionable) {
-            productoSeleccionado = getIntent().getExtras().get("codigo").toString();
+            productoSeleccionado = Objects.requireNonNull(getIntent().getExtras().get("codigo")).toString();
             codigo_tv.setText(productoSeleccionado);
         }
 
-
         limpiar_btn = findViewById(R.id.limpiar_btn);
 
-        agregar_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                tipoSeleccionado = tipoSelector.getSelectedItem().toString();
-                obtenerProducto();
-            }
+        agregar_btn.setOnClickListener(v -> {
+            tipoSeleccionado = tipoSelector.getSelectedItem().toString();
+            obtenerProducto(codigo_tv.getText().toString());
         });
-        limpiar_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                limpiarPedido();
-            }
-        });
+        limpiar_btn.setOnClickListener(v -> limpiarPedido());
 
         finalizar_pedido = findViewById(R.id.finalizar_pedido);
-        finalizar_pedido.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finalizarPedido();
-            }
-        });
-
-        obtenerFolio();
+        finalizar_pedido.setOnClickListener(v -> finalizarPedido());
 
         codigo_tv.addTextChangedListener(new TextWatcher() {
             @Override
@@ -223,8 +291,7 @@ public class Menu_pedidos extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 String text = s.toString();
-                if(!text.equals(text.toUpperCase()))
-                {
+                if (!text.equals(text.toUpperCase())) {
                     text = text.toUpperCase();
                     codigo_tv.setText(text);
                     codigo_tv.setSelection(text.length());
@@ -232,43 +299,35 @@ public class Menu_pedidos extends AppCompatActivity {
             }
         });
 
-        codigo_tv.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
-                InputMethodManager inputMethodManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                if(actionId == EditorInfo.IME_ACTION_DONE
-                        || keyEvent.getAction() == KeyEvent.ACTION_DOWN
-                        || keyEvent.getAction() == KeyEvent.KEYCODE_ENTER) {
-                        if(!cantidad_tv.getText().equals("")){
-                            obtenerProducto();
-                            inputMethodManager.hideSoftInputFromWindow(codigo_tv.getWindowToken(), 0);
-                        } else {
-                            Toast.makeText(getApplicationContext(), "Ingresar código.", Toast.LENGTH_SHORT).show();
-                        }
-
-                    return true;
-
+        codigo_tv.setOnEditorActionListener((textView, actionId, keyEvent) -> {
+            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (actionId == EditorInfo.IME_ACTION_DONE
+                    || keyEvent.getAction() == KeyEvent.ACTION_DOWN
+                    || keyEvent.getAction() == KeyEvent.KEYCODE_ENTER) {
+                if (!cantidad_tv.getText().equals("")) {
+                    obtenerProducto(codigo_tv.getText().toString());
+                    inputMethodManager.hideSoftInputFromWindow(codigo_tv.getWindowToken(), 0);
+                } else {
+                    Toast.makeText(getApplicationContext(), "Ingresar código.", Toast.LENGTH_SHORT).show();
                 }
-                return false;
+                return true;
             }
+            return false;
         });
 
         cantidad_tv.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
             }
 
             @Override
             public void afterTextChanged(Editable s) {
                 String text = s.toString();
-                if(!text.equals(text.toUpperCase()))
-                {
+                if (!text.equals(text.toUpperCase())) {
                     text = text.toUpperCase();
                     cantidad_tv.setText(text);
                     cantidad_tv.setSelection(text.length());
@@ -276,40 +335,36 @@ public class Menu_pedidos extends AppCompatActivity {
             }
         });
 
-        cantidad_tv.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
-                InputMethodManager inputMethodManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                if(actionId == EditorInfo.IME_ACTION_DONE
-                        || keyEvent.getAction() == KeyEvent.ACTION_DOWN
-                        || keyEvent.getAction() == KeyEvent.KEYCODE_ENTER) {
+        cantidad_tv.setOnEditorActionListener((textView, actionId, keyEvent) -> {
+            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (actionId == EditorInfo.IME_ACTION_DONE
+                    || keyEvent.getAction() == KeyEvent.ACTION_DOWN
+                    || keyEvent.getAction() == KeyEvent.KEYCODE_ENTER) {
 
-                    if(!cantidad_tv.getText().equals("")){
-                        obtenerProducto();
-                        inputMethodManager.hideSoftInputFromWindow(cantidad_tv.getWindowToken(), 0);
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Ingresar cantidad.", Toast.LENGTH_SHORT).show();
-                    }
-
-                    return true;
-
+                if (!cantidad_tv.getText().equals("")) {
+                    obtenerProducto(codigo_tv.getText().toString());
+                    inputMethodManager.hideSoftInputFromWindow(cantidad_tv.getWindowToken(), 0);
+                } else {
+                    Toast.makeText(getApplicationContext(), "Ingresar cantidad.", Toast.LENGTH_SHORT).show();
                 }
-                return false;
+
+                return true;
+
             }
+            return false;
         });
 
     }
 
-
     private void initializedFirebaseService() {
-        try{
-            if(!isInitialized){
+        try {
+            if (!isInitialized) {
                 FirebaseDatabase.getInstance().setPersistenceEnabled(true);
                 isInitialized = true;
-            }else {
-                Log.d("ATENCION-FIREBASE:","Already Initialized");
+            } else {
+                Log.d("ATENCION-FIREBASE:", "Already Initialized");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -318,231 +373,70 @@ public class Menu_pedidos extends AppCompatActivity {
         return Pedido.getCliente();
     }
 
-    private void obtenerVendedor() {
+    private void obtenerProducto(String code) {
 
-        if (vendedorActual.equals("admin")) {
+        String cantidad = cantidad_tv.getText().toString().trim();
 
-            vendedor = new Vendedor("ad", "ADMINISTRADOR", "admin","admin", "3327257746", "admin");
+        if (!cantidad.equals("") && (code != null && !code.equals(""))) {
 
-        } else {
-            Query query = dbVendedoresReferencia.orderByChild("email").equalTo(sessionManager.getEmail());
-            query.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
+            progressDialog.setMessage("Buscando producto...");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
 
-                    for (DataSnapshot data : snapshot.getChildren()) {
-                        if (data.child("id").getValue() != null && data.child("nombre").getValue() != null && data.child("password").getValue() != null &&
-                                data.child("telefono").getValue() != null && data.child("usuario").getValue() != null) {
+            productoViewModel.getProducto(code).observe(this, producto -> {
+                if (producto != null) {
 
-                            String id = data.child("id").getValue().toString();
-                            String nombre = data.child("nombre").getValue().toString();
-                            String password = data.child("password").getValue().toString();
-                            String telefono = data.child("telefono").getValue().toString();
-                            String usuario = data.child("usuario").getValue().toString();
-                            String email = data.child("email").getValue().toString();
+                    DecimalFormat df = new DecimalFormat("#.00");
 
-                            vendedor = new Vendedor(id, nombre, usuario, password, telefono, email);
-                        }
+                    ItemProductoPedido itemProductoPedidoproducto = new ItemProductoPedido();
+                    itemProductoPedidoproducto.setId(producto.getCode());
+                    itemProductoPedidoproducto.setNombre(producto.getNombre());
+                    itemProductoPedidoproducto.setMarca(producto.getMarca());
+                    itemProductoPedidoproducto.setCantidad(cantidad);
+                    itemProductoPedidoproducto.setTipo(tipoSeleccionado);
+
+                    switch (tipoSeleccionado) {
+                        case "CCA":
+                            itemProductoPedidoproducto.setPrecio(df.format(producto.getCca()));
+                            break;
+                        case "P4":
+                            itemProductoPedidoproducto.setPrecio(df.format(producto.getP4()));
+                            break;
+                        case "P3":
+                            itemProductoPedidoproducto.setPrecio(df.format(producto.getP3()));
+                            break;
+                        case "P2":
+                            itemProductoPedidoproducto.setPrecio(df.format(producto.getP2()));
+                            break;
+                        case "P1":
+                            itemProductoPedidoproducto.setPrecio(df.format(producto.getP1()));
+                            break;
+                        case "OTRO":
+                            itemProductoPedidoproducto.setPrecio(df.format(precioManual));
+                            break;
+                        default:
+                            itemProductoPedidoproducto.setPrecio(df.format(producto.getLista()));
                     }
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(getApplicationContext(), "Error al buscar vendedor.", Toast.LENGTH_LONG).show();
+                    try {
+                        Pedido.getListaDeProductos().add(itemProductoPedidoproducto);
+                        adapter.notifyDataSetChanged();
+                        clearProductoInfo();
+                        Toast.makeText(getApplicationContext(), "Producto Agregado.", Toast.LENGTH_SHORT).show();
+                        Log.e("PRODUCCCCCCCCCCCCCTOOOOOOOOOOOOOOOOOOOOOOOOO", String.valueOf(producto.getNombre()));
+
+                    } catch (Exception e) {
+                        Toast.makeText(getApplicationContext(), "No se pudo agregar el producto.", Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
+                        progressDialog.dismiss();
+                    }
+
+                } else {
+                    Toast.makeText(getApplicationContext(), "No se pudo agregar el producto.", Toast.LENGTH_LONG).show();
+                    progressDialog.dismiss();
                 }
+                progressDialog.dismiss();
             });
-        }
-
-    }
-
-    private void obtenerProducto() {
-
-        final String cantidad = cantidad_tv.getText().toString().trim();
-        final String codigo = codigo_tv.getText().toString().trim();
-
-        progressDialog.setMessage("Buscando producto...");
-        progressDialog.setCancelable(false);
-        progressDialog.show();
-
-        if (!cantidad.equals("") && !codigo.equals("")) {
-
-            if (Tools.isNumeric(codigo)) {
-
-                final int id = Integer.parseInt(codigo);
-
-                Query query = dbProductosReferencia.orderByChild("id").equalTo(id);
-                query.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                        if(!snapshot.exists()){
-                            Toast.makeText(getApplicationContext(), "No se encontro ningun producto con ese código.", Toast.LENGTH_LONG).show();
-                            progressDialog.dismiss();
-                        }
-
-                        for (DataSnapshot data : snapshot.getChildren()) {
-
-                            if (data.child("id").getValue() != null && data.child("nombre").getValue() != null && data.child("marca").getValue() != null &&
-                                    data.child("cca").getValue() != null && data.child("p4").getValue() != null && data.child("p3").getValue() != null &&
-                                    data.child("p2").getValue() != null && data.child("p1").getValue() != null && data.child("lista").getValue() != null) {
-
-                                DecimalFormat df = new DecimalFormat("#.00");
-
-                                String id = Objects.requireNonNull(data.child("id").getValue()).toString();
-                                String nombre = Objects.requireNonNull(data.child("nombre").getValue()).toString();
-                                String marca = Objects.requireNonNull(data.child("marca").getValue()).toString();
-                                double lista = Double.parseDouble(Objects.requireNonNull(data.child("lista").getValue()).toString());
-                                double cca = Double.parseDouble(Objects.requireNonNull(data.child("cca").getValue()).toString());
-                                double p1 = Double.parseDouble(Objects.requireNonNull(data.child("p1").getValue()).toString());
-                                double p2 = Double.parseDouble(Objects.requireNonNull(data.child("p2").getValue()).toString());
-                                double p3 = Double.parseDouble(Objects.requireNonNull(data.child("p3").getValue()).toString());
-                                double p4 = Double.parseDouble(Objects.requireNonNull(data.child("p4").getValue()).toString());
-
-                                ItemProductoPedido producto = new ItemProductoPedido();
-                                producto.setId(id);
-                                producto.setNombre(nombre);
-                                producto.setMarca(marca);
-                                producto.setCantidad(cantidad);
-                                producto.setTipo(tipoSeleccionado);
-
-                                switch (tipoSeleccionado) {
-                                    case "CCA":
-                                        producto.setPrecio(df.format(cca));
-                                        break;
-                                    case "P4":
-                                        producto.setPrecio(df.format(p4));
-                                        break;
-                                    case "P3":
-                                        producto.setPrecio(df.format(p3));
-                                        break;
-                                    case "P2":
-                                        producto.setPrecio(df.format(p2));
-                                        break;
-                                    case "P1":
-                                        producto.setPrecio(df.format(p1));
-                                        break;
-                                    case "OTRO":
-                                        producto.setPrecio(df.format(precioManual));
-                                        break;
-                                    default:
-                                        producto.setPrecio(df.format(lista));
-                                }
-
-                                try {
-
-                                    Pedido.getListaDeProductos().add(producto);
-                                    adapter.notifyDataSetChanged();
-                                    clearProductoInfo();
-                                    Toast.makeText(getApplicationContext(), "Producto Agregado.", Toast.LENGTH_SHORT).show();
-                                    Log.e("PRODUCCCCCCCCCCCCCTOOOOOOOOOOOOOOOOOOOOOOOOO",String.valueOf(producto.getNombre()));
-                                    break;
-
-                                } catch (Exception e){
-                                    Toast.makeText(getApplicationContext(), "No se pudo agregar el producto.", Toast.LENGTH_LONG).show();
-                                    e.printStackTrace();
-                                    progressDialog.dismiss();
-                                }
-
-                            }
-                        }
-
-                        progressDialog.dismiss();
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Toast.makeText(getApplicationContext(), "No se encontro ningun producto con ese codigo. " + error, Toast.LENGTH_LONG).show();
-                        progressDialog.dismiss();
-                    }
-                });
-
-            } else {
-
-                Query query = dbProductosReferencia.orderByChild("id").equalTo(codigo);
-                query.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                        if(!snapshot.exists()){
-                            Toast.makeText(getApplicationContext(), "No se encontro ningun producto con ese código.", Toast.LENGTH_LONG).show();
-                            progressDialog.dismiss();
-                        }
-
-                        for (DataSnapshot data : snapshot.getChildren()) {
-
-                            if (data.child("id").getValue() != null && data.child("nombre").getValue() != null && data.child("marca").getValue() != null &&
-                                    data.child("cca").getValue() != null && data.child("p4").getValue() != null && data.child("p3").getValue() != null &&
-                                    data.child("p2").getValue() != null && data.child("p1").getValue() != null && data.child("lista").getValue() != null) {
-
-                                DecimalFormat df = new DecimalFormat("#.00");
-
-                                String id = Objects.requireNonNull(data.child("id").getValue()).toString();
-                                String nombre = Objects.requireNonNull(data.child("nombre").getValue()).toString();
-                                String marca = Objects.requireNonNull(data.child("marca").getValue()).toString();
-                                double lista = Double.parseDouble(Objects.requireNonNull(data.child("lista").getValue()).toString());
-                                double cca = Double.parseDouble(Objects.requireNonNull(data.child("cca").getValue()).toString());
-                                double p1 = Double.parseDouble(Objects.requireNonNull(data.child("p1").getValue()).toString());
-                                double p2 = Double.parseDouble(Objects.requireNonNull(data.child("p2").getValue()).toString());
-                                double p3 = Double.parseDouble(Objects.requireNonNull(data.child("p3").getValue()).toString());
-                                double p4 = Double.parseDouble(Objects.requireNonNull(data.child("p4").getValue()).toString());
-
-                                ItemProductoPedido producto = new ItemProductoPedido();
-                                producto.setId(id);
-                                producto.setNombre(nombre);
-                                producto.setMarca(marca);
-                                producto.setCantidad(cantidad);
-                                producto.setTipo(tipoSeleccionado);
-
-                                switch (tipoSeleccionado) {
-                                    case "CCA":
-                                        producto.setPrecio(df.format(cca));
-                                        break;
-                                    case "P4":
-                                        producto.setPrecio(df.format(p4));
-                                        break;
-                                    case "P3":
-                                        producto.setPrecio(df.format(p3));
-                                        break;
-                                    case "P2":
-                                        producto.setPrecio(df.format(p2));
-                                        break;
-                                    case "P1":
-                                        producto.setPrecio(df.format(p1));
-                                        break;
-                                    case "OTRO":
-                                        producto.setPrecio(df.format(precioManual));
-                                        break;
-                                    default:
-                                        producto.setPrecio(df.format(lista));
-                                }
-
-                                try {
-
-                                    Pedido.getListaDeProductos().add(producto);
-                                    adapter.notifyDataSetChanged();
-                                    clearProductoInfo();
-                                    Toast.makeText(getApplicationContext(), "Producto Agregado.", Toast.LENGTH_SHORT).show();
-                                    Log.e("PRODUCCCCCCCCCCCCCTOOOOOOOOOOOOOOOOOOOOOOOOO",String.valueOf(producto.getNombre()));
-                                    break;
-                                } catch (Exception e){
-                                    Toast.makeText(getApplicationContext(), "No se pudo agregar el producto.", Toast.LENGTH_LONG).show();
-                                    e.printStackTrace();
-                                    progressDialog.dismiss();
-                                }
-
-                            }
-                        }
-                        progressDialog.dismiss();
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Toast.makeText(getApplicationContext(), "No se encontro ningun producto con ese código. " + error, Toast.LENGTH_LONG).show();
-                        progressDialog.dismiss();
-                    }
-                });
-            }
-
 
         } else {
             Toast.makeText(getApplicationContext(), "Debe ingresar un código y una cantidad de productos.", Toast.LENGTH_LONG).show();
@@ -577,7 +471,6 @@ public class Menu_pedidos extends AppCompatActivity {
             synchronized (Pedido.getListaDeProductos()) {
                 Pedido.getListaDeProductos().notify();
             }
-
         }
     }
 
@@ -586,25 +479,15 @@ public class Menu_pedidos extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Limpiar pedido");
         builder.setMessage("Se eliminaran todos los productos agregados a la lista.");
-        builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                clear();
-            }
-        });
-        builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
+        builder.setPositiveButton("Aceptar", (dialog, which) -> clear());
+        builder.setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss());
 
         builder.show();
 
         adapter.notifyDataSetChanged();
     }
 
-    public void clearProductoInfo(){
+    public void clearProductoInfo() {
         codigo_tv.setText("");
         cantidad_tv.setText("");
         tipoSelector.setSelection(0);
@@ -612,119 +495,88 @@ public class Menu_pedidos extends AppCompatActivity {
 
     private String generarFolio() {
 
-        int cantidadDeCifrasPedido = String.valueOf(pedido).length();
-
-        String folioPedido = "";
-
-        String folioGenerado = Pedido.getVendedor().getUserName();
-
         String tipo = "";
 
-        if(Pedido.getTipo().equals("pedido")){
+        if (Pedido.getTipo().equals("pedido")) {
             tipo = "P";
-        } else if (Pedido.getTipo().equals("cotizacion")){
+        } else if (Pedido.getTipo().equals("cotizacion")) {
             tipo = "C";
         }
 
-        switch (cantidadDeCifrasPedido) {
-            case 1:
-                folioPedido = "000" + pedido;
-                break;
-            case 2:
-                folioPedido = "00" + pedido;
-                break;
-            case 3:
-                folioPedido = "0" + pedido;
-                break;
-            case 4:
-                folioPedido = String.valueOf(pedido);
-        }
+        String folioGenerado = Pedido.getVendedor().getUsuario();
+        String folioPedido = String.format(Locale.getDefault(), "%04d", pedido);
 
         return tipo + folioGenerado + "-" + folioPedido;
-
     }
 
     private void obtenerFolio() {
 
-        if(vendedorActual.equals("admin")){
-           pedido = 0;
-           return;
+        String tipoPedido = Pedido.getTipo();
+        int ultimoPedido = PedidoManager.getInstance(getApplicationContext()).getUltimoFolioPedidos();
+        int ultimoCotizacion = PedidoManager.getInstance(getApplicationContext()).getUltimoFolioCotizaciones();
+
+
+        System.out.println("ULTIMO FOLIO: " + PedidoManager.getInstance(getApplicationContext()).getUltimoFolioPedidos());
+        System.out.println("ENTRANDO A OBTENER FOLIOS....");
+
+        if (tipoPedido.equals("pedido")) {
+            if (isInternetAvailable()) {
+                DatabaseReference referencia = dbFoliosReferencia;
+                obtenerMayorFolio(referencia, "P");
+            } else {
+                pedido = ultimoPedido + 1;
+                PedidoManager.getInstance(getApplicationContext()).guardarUltimoFolioPedidos(pedido);
+
+            }
+        } else if (tipoPedido.equals("cotizacion")) {
+            if (isInternetAvailable()) {
+                DatabaseReference referencia = dbCotizacionesReferencia;
+                obtenerMayorFolio(referencia, "C");
+            } else {
+                pedido = ultimoCotizacion + 1;
+                PedidoManager.getInstance(getApplicationContext()).guardarUltimoFolioCotizaciones(pedido);
+
+            }
         }
+    }
 
-        if(Pedido.getTipo().equals("pedido")){
+    private void obtenerMayorFolio(@NonNull DatabaseReference referencia, String tipo) {
 
-            dbFoliosReferencia.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
 
-                        int mayor = 0;
-                        int actual;
+        System.out.println("OBTENIENDO FOLIO MAYOR......");
 
-                        for (DataSnapshot data : snapshot.getChildren()) {
+        Query query = referencia.orderByChild("folio").startAt(tipo + vendedor.getUsuario()).endAt(tipo + vendedor.getUsuario() + "\uf8ff");
 
-                            if(data.child("folio").getValue()!=null){
-                                
-                                if(data.child("folio").getValue().toString().startsWith("P")) {
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int mayor = 0;
+                int actual;
 
-                                    if (vendedor.getUserName().equals(data.child("folio").getValue().toString().split("-")[0].substring(1, 3))) {
+                for (DataSnapshot data : snapshot.getChildren()) {
+                    System.out.println("FOLIO ENCONTRADO.........." + data.child("folio").getValue());
 
-                                        actual = Integer.parseInt(data.child("folio").getValue().toString().split("-")[1].substring(0, 4));
+                    String folioValue = data.child("folio").getValue().toString();
+                    actual = Integer.parseInt(folioValue.split("-")[1].substring(0, 4));
 
-                                        if (actual > mayor) {
-                                            mayor = actual;
-                                        }
-                                        pedido = mayor + 1;
-                                    }
-                                }
-                            }
-                        }
-
+                    if (actual > mayor) {
+                        mayor = actual;
                     }
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
+                pedido = mayor + 1;
 
+                if (tipo.equals("P")) {
+                    PedidoManager.getInstance(getApplicationContext()).guardarUltimoFolioPedidos(pedido);
+                } else if (tipo.equals("C")) {
+                    PedidoManager.getInstance(getApplicationContext()).guardarUltimoFolioCotizaciones(pedido);
                 }
-            });
+            }
 
-        } else if(Pedido.getTipo().equals("cotizacion")){
-
-            dbCotizacionesReferencia.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-
-                        int mayor = 0;
-                        int actual;
-
-                        for (DataSnapshot data : snapshot.getChildren()) {
-
-                            if (data.child("folio").getValue().toString().startsWith("P")) {
-                                if (data.child("folio").getValue() != null) {
-
-                                    if (vendedor.getUserName().equals(data.child("folio").getValue().toString().split("-")[0].substring(1, 3))) {
-                                        actual = Integer.parseInt(data.child("folio").getValue().toString().split("-")[1].substring(0, 4));
-
-                                        if (actual > mayor) {
-                                            mayor = actual;
-                                        }
-                                        pedido = mayor + 1;
-                                    }
-                                }
-                            }
-                        }
-
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-        }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
     }
 
     public String calcularTotal() {
@@ -732,7 +584,7 @@ public class Menu_pedidos extends AppCompatActivity {
         DecimalFormat df = new DecimalFormat("#.00");
         double total = 0.0;
         for (ItemProductoPedido producto : Pedido.getListaDeProductos()) {
-            double monto = Double.parseDouble(producto.getPrecio().replace(",",".")) * Double.parseDouble(producto.getCantidad().replace(",","."));
+            double monto = Double.parseDouble(producto.getPrecio().replace(",", ".")) * Double.parseDouble(producto.getCantidad().replace(",", "."));
             total = total + monto;
         }
         return df.format(total);
@@ -749,26 +601,19 @@ public class Menu_pedidos extends AppCompatActivity {
                 .setTitle("Pecio manual")
                 .setMessage("Agregue el precio manualmente")
                 .setView(input)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-
-                    public void onClick(DialogInterface dialog, int which) {
-                        String value = input.getText().toString();
-                        if (input.getText().toString().trim().length() == 0) {
-                            Toast.makeText(getApplicationContext(),"No ha ingresado ningun precio", Toast.LENGTH_SHORT).show();
-                        } else {
-                            precioManual = Double.parseDouble(value);
-                        }
-                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    String value = input.getText().toString();
+                    if (input.getText().toString().trim().length() == 0) {
+                        Toast.makeText(getApplicationContext(), "No ha ingresado ningun precio", Toast.LENGTH_SHORT).show();
+                    } else {
+                        precioManual = Double.parseDouble(value);
                     }
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
                 })
-                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-
-                    public void onClick(DialogInterface dialog, int which) {
-                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
-                    }
-
+                .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
                 });
 
         builder.show();
@@ -780,55 +625,47 @@ public class Menu_pedidos extends AppCompatActivity {
 
     private void back() {
 
-        if(Pedido.getListaDeProductos().size()!=0){
+        if (Pedido.getListaDeProductos().size() != 0) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Ir a lista de clientes");
             builder.setMessage("¿Desea cancelar su pedido?");
-            builder.setPositiveButton("SI", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    Pedido.setObservaciones(null);
-                    if (tipoCliente.equals("clienteEscaneado")) {
-                        Intent intent = new Intent(getApplicationContext(), QrScanner.class);
-                        intent.putExtra("tipoCliente", tipoCliente);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
-                                Intent.FLAG_ACTIVITY_CLEAR_TASK |
-                                Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    } else if (tipoCliente.equals("clienteRegistrado") || tipoCliente.equals("clienteExpress")){
-                        Intent intent = new Intent(getApplicationContext(), Lista_clientes.class);
-                        intent.putExtra("tipoCliente", tipoCliente);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
-                                Intent.FLAG_ACTIVITY_CLEAR_TASK |
-                                Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    } else {
-                        Intent intent = new Intent(getApplicationContext(), Lista_clientes.class);
-                        intent.putExtra("tipoCliente", tipoCliente);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
-                                Intent.FLAG_ACTIVITY_CLEAR_TASK |
-                                Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    }
+            builder.setPositiveButton("SI", (dialogInterface, i) -> {
+                Pedido.setObservaciones(null);
+                if (tipoCliente.equals("clienteEscaneado")) {
+                    Intent intent = new Intent(getApplicationContext(), QrScanner.class);
+                    intent.putExtra("tipoCliente", tipoCliente);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                            Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                            Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                } else if (tipoCliente.equals("clienteRegistrado") || tipoCliente.equals("clienteExpress")) {
+                    Intent intent = new Intent(getApplicationContext(), Lista_clientes.class);
+                    intent.putExtra("tipoCliente", tipoCliente);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                            Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                            Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(getApplicationContext(), Lista_clientes.class);
+                    intent.putExtra("tipoCliente", tipoCliente);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                            Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                            Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
                 }
             });
-            builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-
-                }
-            });
+            builder.setNegativeButton("NO", (dialogInterface, i) -> {});
             builder.show();
         } else {
             Pedido.setObservaciones(null);
-            if(tipoCliente.equals("clienteEscaneado")){
+            if (tipoCliente.equals("clienteEscaneado")) {
                 Intent intent = new Intent(getApplicationContext(), QrScanner.class);
                 intent.putExtra("tipoCliente", tipoCliente);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
                         Intent.FLAG_ACTIVITY_CLEAR_TASK |
                         Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
-            } else if(tipoCliente.equals("clienteRegistrado")){
+            } else if (tipoCliente.equals("clienteRegistrado")) {
                 Intent intent = new Intent(getApplicationContext(), Lista_clientes.class);
                 intent.putExtra("tipoCliente", tipoCliente);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
@@ -844,5 +681,76 @@ public class Menu_pedidos extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         back();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_buscador, menu);
+        MenuItem item = menu.findItem(R.id.search);
+        item.setTooltipText("Ingresar codigo");
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
+        searchView.setOnQueryTextListener(this);
+        MenuItemCompat.setOnActionExpandListener(item, new MenuItemCompat.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                container.setVisibility(View.VISIBLE);
+                ControllerRecyclerViewAdapter.itemSeleccionado = null;
+                adapterBusqueda.notifyDataSetChanged();
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                container.setVisibility(View.GONE);
+                if (!cantidad_tv.getText().equals("") && ControllerRecyclerViewAdapter.itemSeleccionado != null) {
+                    obtenerProducto(ControllerRecyclerViewAdapter.itemSeleccionado.getId());
+                } else if (cantidad_tv.getText().equals("")) {
+                    Toast.makeText(getApplicationContext(), "Ingresar cantidad.", Toast.LENGTH_SHORT).show();
+                }
+                adapterBusqueda.setFilter(listaProductosBusqueda);
+                adapterBusqueda.notifyDataSetChanged();
+                return true;
+            }
+        });
+        return true;
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String s) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        recyclerViewBusqueda.setVisibility(View.VISIBLE);
+        try {
+            ArrayList<Item> listaFiltrada = filter((ArrayList<Item>) listaProductosBusqueda, newText);
+            adapterBusqueda.setFilter(listaFiltrada);
+            adapterBusqueda.notifyDataSetChanged();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private ArrayList<Item> filter(ArrayList<Item> items, String texto) {
+        ArrayList<Item> listaFiltrada = new ArrayList<>();
+        try {
+            String textoMiniscula = texto.toLowerCase();
+            for (Item item : items) {
+                String itemFilter = item.getTitulo().toLowerCase();
+                if (itemFilter.contains(textoMiniscula)) {
+                    listaFiltrada.add(item);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return listaFiltrada;
+    }
+
+    private boolean isInternetAvailable() {
+        return internetManager.isInternetAvaible();
     }
 }

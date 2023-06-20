@@ -14,8 +14,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.brainstormideas.caballeroaztecaventas.R;
-import com.brainstormideas.caballeroaztecaventas.entidad.ItemProductoPedido;
 import com.brainstormideas.caballeroaztecaventas.data.models.Pedido;
+import com.brainstormideas.caballeroaztecaventas.entidad.ItemProductoPedido;
 import com.brainstormideas.caballeroaztecaventas.utils.Tools;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -75,7 +75,7 @@ public class RecyclerViewProductosPedidoAdapter extends RecyclerView.Adapter {
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                                     for (DataSnapshot ds : snapshot.getChildren()) {
                                         ds.getRef().removeValue();
-                                        Pedido.getListaDeProductos().remove(position-1);
+                                        Pedido.getListaDeProductos().remove(position - 1);
                                     }
                                 }
 
@@ -146,7 +146,7 @@ public class RecyclerViewProductosPedidoAdapter extends RecyclerView.Adapter {
             tvPrecio = itemView.findViewById(R.id.precio_tv);
             tvTipo = itemView.findViewById(R.id.tipo_tv);
             btnEliminar = itemView.findViewById(R.id.eliminar_ibtn);
-            row_linearlayout = (LinearLayout) itemView.findViewById(R.id.linearLayout_item);
+            row_linearlayout = itemView.findViewById(R.id.linearLayout_item);
         }
     }
 

@@ -1,5 +1,7 @@
 package com.brainstormideas.caballeroaztecaventas.ui;
 
+import static com.brainstormideas.caballeroaztecaventas.ui.MainActivity.isInitialized;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,8 +23,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Objects;
-
-import static com.brainstormideas.caballeroaztecaventas.ui.Verificador_precio.isInitialized;
 
 public class Marcas extends AppCompatActivity {
 
@@ -56,41 +56,28 @@ public class Marcas extends AppCompatActivity {
         marcas_gv.setAdapter(gridAdapter);
 
 
-        marcas_gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String marca = gridAdapter.getItem(position).toString();
-                irMarca(marca);
-            }
+        marcas_gv.setOnItemClickListener((parent, view, position, id) -> {
+            String marca = gridAdapter.getItem(position).toString();
+            irMarca(marca);
         });
 
         direct_home_btn = findViewById(R.id.direct_home_btn);
-        direct_home_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                goHome();
-            }
-        });
+        direct_home_btn.setOnClickListener(v -> goHome());
 
         home_button = findViewById(R.id.home_button);
-        home_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                home();
-            }
-        });
+        home_button.setOnClickListener(view -> home());
 
     }
 
     private void initializedFirebaseService() {
-        try{
-            if(!isInitialized){
+        try {
+            if (!isInitialized) {
                 FirebaseDatabase.getInstance().setPersistenceEnabled(true);
                 isInitialized = true;
-            }else {
-                Log.d("ATENCION-FIREBASE:","Already Initialized");
+            } else {
+                Log.d("ATENCION-FIREBASE:", "Already Initialized");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -126,7 +113,7 @@ public class Marcas extends AppCompatActivity {
         });
     }
 
-    private void goHome(){
+    private void goHome() {
         Intent i = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(i);
     }

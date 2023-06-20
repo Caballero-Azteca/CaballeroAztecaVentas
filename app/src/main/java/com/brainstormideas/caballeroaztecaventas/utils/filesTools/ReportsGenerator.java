@@ -4,10 +4,10 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
-import com.brainstormideas.caballeroaztecaventas.entidad.ItemProductoPedido;
 import com.brainstormideas.caballeroaztecaventas.data.models.Cliente;
 import com.brainstormideas.caballeroaztecaventas.data.models.Pedido;
 import com.brainstormideas.caballeroaztecaventas.data.models.Vendedor;
+import com.brainstormideas.caballeroaztecaventas.entidad.ItemProductoPedido;
 
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -44,7 +44,7 @@ public class ReportsGenerator {
         workbook = new HSSFWorkbook();
         sheet = workbook.createSheet("Pedido");
         this.img = img;
-        if(Pedido.getDocumento().equals("Factura")){
+        if (Pedido.getDocumento().equals("Factura")) {
             precioTitulo = "PRECIO (SIN IVA)";
         }
         titulos = new String[]{"CANTIDAD", "CODIGO", "MARCA", "DESCRIPCION DEL ARTICULO", precioTitulo};
@@ -184,7 +184,7 @@ public class ReportsGenerator {
 
         for (int i = 0; i < listDeProductos.size(); ++i) {
 
-            Row dataRow = sheet.createRow(i+17);
+            Row dataRow = sheet.createRow(i + 17);
             String cantidad = listDeProductos.get(i).getCantidad();
             String codigo = listDeProductos.get(i).getId();
             String marca = listDeProductos.get(i).getMarca();
@@ -199,11 +199,11 @@ public class ReportsGenerator {
 
         }
 
-        Row filaTotal = sheet.createRow(listDeProductos.size()+18);
+        Row filaTotal = sheet.createRow(listDeProductos.size() + 18);
         Cell celdaTotal = filaTotal.createCell(0);
         celdaTotal.setCellValue("TOTAL:" + Pedido.getTotal());
 
-        Row filaObservaciones = sheet.createRow(listDeProductos.size()+19);
+        Row filaObservaciones = sheet.createRow(listDeProductos.size() + 19);
         Cell celdaObservaciones = filaObservaciones.createCell(0);
         if (!Pedido.getObservaciones().equals("")) {
             celdaObservaciones.setCellValue("Observaciones:" + Pedido.getObservaciones().toUpperCase());
@@ -214,7 +214,7 @@ public class ReportsGenerator {
     }
 
     public void guardar() {
-        file = new File(context.getExternalFilesDir(null),  Pedido.getFolio() +  "xls.xls");
+        file = new File(context.getExternalFilesDir(null), Pedido.getFolio() + "xls.xls");
         FileOutputStream outputStream = null;
 
         try {

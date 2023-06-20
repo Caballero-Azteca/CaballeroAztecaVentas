@@ -1,5 +1,7 @@
 package com.brainstormideas.caballeroaztecaventas.ui;
 
+import static com.brainstormideas.caballeroaztecaventas.ui.MainActivity.isInitialized;
+
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -35,8 +37,6 @@ import com.google.firebase.database.ValueEventListener;
 import java.io.IOException;
 import java.util.Objects;
 
-import static com.brainstormideas.caballeroaztecaventas.ui.Verificador_precio.isInitialized;
-
 public class QrScanner extends AppCompatActivity {
 
     private Button volver;
@@ -70,14 +70,14 @@ public class QrScanner extends AppCompatActivity {
     }
 
     private void initializedFirebaseService() {
-        try{
-            if(!isInitialized){
+        try {
+            if (!isInitialized) {
                 FirebaseDatabase.getInstance().setPersistenceEnabled(true);
                 isInitialized = true;
-            }else {
-                Log.d("ATENCION-FIREBASE:","Already Initialized");
+            } else {
+                Log.d("ATENCION-FIREBASE:", "Already Initialized");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -109,7 +109,6 @@ public class QrScanner extends AppCompatActivity {
                         requestPermissions(new String[]{Manifest.permission.CAMERA},
                                 MY_PERMISSIONS_REQUEST_CAMERA);
                     }
-                    return;
                 } else {
                     try {
                         cameraSource.start(cameraView.getHolder());
@@ -136,7 +135,7 @@ public class QrScanner extends AppCompatActivity {
 
 
             @Override
-            public void receiveDetections(Detector.Detections<Barcode> detections) {
+            public void receiveDetections(@NonNull Detector.Detections<Barcode> detections) {
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
 
                 if (barcodes.size() > 0) {
@@ -205,11 +204,11 @@ public class QrScanner extends AppCompatActivity {
                                 && data.child("agenteCobro").getValue() != null && data.child("ruta").getValue() != null) {
 
 
-
-                            String numeroInterior ="";
+                            String numeroInterior = "";
                             String telefono = "";
 
                             String id = Objects.requireNonNull(data.child("id").getValue()).toString();
+                            String code = Objects.requireNonNull(data.child("code").getValue()).toString();
                             String razon = Objects.requireNonNull(data.child("razon").getValue()).toString();
                             String rfc = Objects.requireNonNull(data.child("rfc").getValue()).toString();
                             String municipio = Objects.requireNonNull(data.child("municipio").getValue()).toString();
@@ -217,11 +216,11 @@ public class QrScanner extends AppCompatActivity {
                             String calle = Objects.requireNonNull(data.child("calle").getValue()).toString();
                             String colonia = Objects.requireNonNull(data.child("colonia").getValue()).toString();
                             String numeroExterior = Objects.requireNonNull(data.child("numeroExterior").getValue()).toString();
-                            if(data.child("numeroInterior").getValue() != null){
+                            if (data.child("numeroInterior").getValue() != null) {
                                 numeroInterior = Objects.requireNonNull(data.child("numeroInterior").getValue()).toString();
                             }
                             String cp = Objects.requireNonNull(data.child("cp").getValue()).toString();
-                            if(data.child("telefono").getValue() != null) {
+                            if (data.child("telefono").getValue() != null) {
                                 telefono = Objects.requireNonNull(data.child("telefono").getValue()).toString();
                             }
                             String email = Objects.requireNonNull(data.child("email").getValue()).toString();
@@ -229,7 +228,7 @@ public class QrScanner extends AppCompatActivity {
                             String agenteCobro = Objects.requireNonNull(data.child("agenteCobro").getValue()).toString();
                             String ruta = Objects.requireNonNull(data.child("ruta").getValue()).toString();
 
-                            Cliente cliente = new Cliente(id, razon, rfc, municipio, estado, calle, colonia, numeroExterior,
+                            Cliente cliente = new Cliente(Long.getLong(id), code, razon, rfc, municipio, estado, calle, colonia, numeroExterior,
                                     numeroInterior, cp, telefono, email, ruta, agenteVenta, agenteCobro);
 
                             Pedido.setCliente(cliente);
@@ -270,11 +269,11 @@ public class QrScanner extends AppCompatActivity {
                                 && data.child("agenteCobro").getValue() != null && data.child("ruta").getValue() != null) {
 
 
-
-                            String numeroInterior ="";
+                            String numeroInterior = "";
                             String telefono = "";
 
                             String id = Objects.requireNonNull(data.child("id").getValue()).toString();
+                            String code = Objects.requireNonNull(data.child("code").getValue()).toString();
                             String razon = Objects.requireNonNull(data.child("razon").getValue()).toString();
                             String rfc = Objects.requireNonNull(data.child("rfc").getValue()).toString();
                             String municipio = Objects.requireNonNull(data.child("municipio").getValue()).toString();
@@ -282,11 +281,11 @@ public class QrScanner extends AppCompatActivity {
                             String calle = Objects.requireNonNull(data.child("calle").getValue()).toString();
                             String colonia = Objects.requireNonNull(data.child("colonia").getValue()).toString();
                             String numeroExterior = Objects.requireNonNull(data.child("numeroExterior").getValue()).toString();
-                            if(data.child("numeroInterior").getValue() != null){
+                            if (data.child("numeroInterior").getValue() != null) {
                                 numeroInterior = Objects.requireNonNull(data.child("numeroInterior").getValue()).toString();
                             }
                             String cp = Objects.requireNonNull(data.child("cp").getValue()).toString();
-                            if(data.child("telefono").getValue() != null) {
+                            if (data.child("telefono").getValue() != null) {
                                 telefono = Objects.requireNonNull(data.child("telefono").getValue()).toString();
                             }
                             String email = Objects.requireNonNull(data.child("email").getValue()).toString();
@@ -294,7 +293,7 @@ public class QrScanner extends AppCompatActivity {
                             String agenteCobro = Objects.requireNonNull(data.child("agenteCobro").getValue()).toString();
                             String ruta = Objects.requireNonNull(data.child("ruta").getValue()).toString();
 
-                            Cliente cliente = new Cliente(id, razon, rfc, municipio, estado, calle, colonia, numeroExterior,
+                            Cliente cliente = new Cliente(Long.getLong(id), code, razon, rfc, municipio, estado, calle, colonia, numeroExterior,
                                     numeroInterior, cp, telefono, email, ruta, agenteVenta, agenteCobro);
 
                             Pedido.setCliente(cliente);
@@ -319,7 +318,7 @@ public class QrScanner extends AppCompatActivity {
         }
     }
 
-    public void refresh(){
+    public void refresh() {
         Intent intent = new Intent(QrScanner.this, QrScanner.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);

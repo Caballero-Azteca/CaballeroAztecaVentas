@@ -1,5 +1,7 @@
 package com.brainstormideas.caballeroaztecaventas.ui;
 
+import static com.brainstormideas.caballeroaztecaventas.ui.MainActivity.isInitialized;
+
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -19,15 +21,17 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.MenuItemCompat;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.brainstormideas.caballeroaztecaventas.R;
-import com.brainstormideas.caballeroaztecaventas.ui.adapters.ControllerRecyclerViewAdapter;
-import com.brainstormideas.caballeroaztecaventas.ui.adapters.RecyclerViewAdapter;
-import com.brainstormideas.caballeroaztecaventas.entidad.Item;
 import com.brainstormideas.caballeroaztecaventas.data.models.Cliente;
 import com.brainstormideas.caballeroaztecaventas.data.models.Pedido;
+import com.brainstormideas.caballeroaztecaventas.entidad.Item;
+import com.brainstormideas.caballeroaztecaventas.ui.adapters.ControllerRecyclerViewAdapter;
+import com.brainstormideas.caballeroaztecaventas.ui.adapters.RecyclerViewAdapter;
+import com.brainstormideas.caballeroaztecaventas.ui.viewmodels.ClienteViewModel;
 import com.brainstormideas.caballeroaztecaventas.utils.SessionManager;
 import com.brainstormideas.caballeroaztecaventas.utils.Tools;
 import com.google.firebase.auth.FirebaseAuth;
@@ -40,9 +44,8 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-
-import static com.brainstormideas.caballeroaztecaventas.ui.Verificador_precio.isInitialized;
 
 public class Lista_clientes extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
@@ -68,6 +71,8 @@ public class Lista_clientes extends AppCompatActivity implements SearchView.OnQu
     private ProgressDialog progressDialog;
     SessionManager sessionManager;
 
+    ClienteViewModel clienteViewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,6 +80,8 @@ public class Lista_clientes extends AppCompatActivity implements SearchView.OnQu
 
         ControllerRecyclerViewAdapter.itemSeleccionado = null;
         initializedFirebaseService();
+
+        clienteViewModel = new ClienteViewModel(this);
 
         dbClientesReferencia = FirebaseDatabase.getInstance().getReference().child("Cliente");
         sessionManager = new SessionManager(this);
@@ -92,42 +99,26 @@ public class Lista_clientes extends AppCompatActivity implements SearchView.OnQu
         cliente_view = findViewById(R.id.cliente_view);
 
         home_button = findViewById(R.id.home_button);
-        home_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                home();
-            }
-        });
+        home_button.setOnClickListener(view -> home());
         abrir_pedido = findViewById(R.id.abrir);
         btn_editar = findViewById(R.id.btn_editar);
-        btn_editar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (ControllerRecyclerViewAdapter.itemSeleccionado != null) {
-                    editarCliente();
-                } else {
-                    Toast.makeText(getApplicationContext(), "Debe seleccionar un cliente", Toast.LENGTH_LONG).show();
-                }
+        btn_editar.setOnClickListener(v -> {
+            if (ControllerRecyclerViewAdapter.itemSeleccionado != null) {
+                //editarCliente();
+            } else {
+                Toast.makeText(getApplicationContext(), "Debe seleccionar un cliente", Toast.LENGTH_LONG).show();
             }
         });
 
         btn_eliminar = findViewById(R.id.btn_eliminar);
-        btn_eliminar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                eliminarCliente();
+        btn_eliminar.setOnClickListener(v -> eliminarCliente());
+        abrir_pedido.setOnClickListener(view -> {
+            if (ControllerRecyclerViewAdapter.itemSeleccionado != null) {
+                abrirPedido();
+            } else {
+                Toast.makeText(getApplicationContext(), "Debe seleccionar un cliente", Toast.LENGTH_LONG).show();
             }
-        });
-        abrir_pedido.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (ControllerRecyclerViewAdapter.itemSeleccionado != null) {
-                    abrirPedido();
-                } else {
-                    Toast.makeText(getApplicationContext(), "Debe seleccionar un cliente", Toast.LENGTH_LONG).show();
-                }
 
-            }
         });
 
         if (!sessionManager.getUsuario().equals("admin")) {
@@ -137,16 +128,16 @@ public class Lista_clientes extends AppCompatActivity implements SearchView.OnQu
     }
 
     private void initializedFirebaseService() {
-        try{
-            if(!isInitialized){
+        try {
+            if (!isInitialized) {
                 FirebaseDatabase.getInstance().setPersistenceEnabled(true);
                 FirebaseDatabase.getInstance().getReference("Cliente")
                         .keepSynced(true);
                 isInitialized = true;
-            }else {
-                Log.d("ATENCION-FIREBASE:","Already Initialized");
+            } else {
+                Log.d("ATENCION-FIREBASE:", "Already Initialized");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -166,134 +157,19 @@ public class Lista_clientes extends AppCompatActivity implements SearchView.OnQu
         progressDialog.setCanceledOnTouchOutside(false);
         progressDialog.show();
 
-        if (Tools.isNumeric(codigoCliente)) {
+        clienteViewModel.getCliente(codigoCliente).observe(this, new Observer<Cliente>() {
+            @Override
+            public void onChanged(Cliente cliente) {
 
-            int codigoNumerico = Integer.parseInt(codigoCliente);
+                Pedido.setCliente(cliente);
+                Intent i = new Intent(getApplicationContext(), Menu_pedidos.class);
+                i.putExtra("seleccionable", false);
+                i.putExtra("tipoCliente", "clienteRegistrado");
+                startActivity(i);
 
-            Query query = dbClientesReferencia.orderByChild("id").equalTo(codigoNumerico);
-            query.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    for (DataSnapshot data : snapshot.getChildren()) {
-
-                        if (data.child("id").getValue() != null && data.child("razon").getValue() != null && data.child("rfc").getValue() != null &&
-                                data.child("municipio").getValue() != null && data.child("estado").getValue() != null && data.child("calle").getValue() != null
-                                && data.child("colonia").getValue() != null && data.child("numeroExterior").getValue() != null &&
-                                data.child("cp").getValue() != null && data.child("email").getValue() != null && data.child("agenteVenta").getValue() != null
-                                && data.child("agenteCobro").getValue() != null && data.child("ruta").getValue() != null) {
-
-
-
-                            String numeroInterior ="";
-                            String telefono = "";
-
-                            String id = Objects.requireNonNull(data.child("id").getValue()).toString();
-                            String razon = Objects.requireNonNull(data.child("razon").getValue()).toString();
-                            String rfc = Objects.requireNonNull(data.child("rfc").getValue()).toString();
-                            String municipio = Objects.requireNonNull(data.child("municipio").getValue()).toString();
-                            String estado = Objects.requireNonNull(data.child("estado").getValue()).toString();
-                            String calle = Objects.requireNonNull(data.child("calle").getValue()).toString();
-                            String colonia = Objects.requireNonNull(data.child("colonia").getValue()).toString();
-                            String numeroExterior = Objects.requireNonNull(data.child("numeroExterior").getValue()).toString();
-                            if(data.child("numeroInterior").getValue() != null){
-                                numeroInterior = Objects.requireNonNull(data.child("numeroInterior").getValue()).toString();
-                            }
-                            String cp = Objects.requireNonNull(data.child("cp").getValue()).toString();
-                            if(data.child("telefono").getValue() != null) {
-                                telefono = Objects.requireNonNull(data.child("telefono").getValue()).toString();
-                            }
-                            String email = Objects.requireNonNull(data.child("email").getValue()).toString();
-                            String agenteVenta = Objects.requireNonNull(data.child("agenteVenta").getValue()).toString();
-                            String agenteCobro = Objects.requireNonNull(data.child("agenteCobro").getValue()).toString();
-                            String ruta = Objects.requireNonNull(data.child("ruta").getValue()).toString();
-
-                            Cliente cliente = new Cliente(id, razon, rfc, municipio, estado, calle, colonia, numeroExterior,
-                                    numeroInterior, cp, telefono, email, ruta, agenteVenta, agenteCobro);
-
-                            Pedido.setCliente(cliente);
-                            Intent i = new Intent(getApplicationContext(), Menu_pedidos.class);
-                            i.putExtra("seleccionable", false);
-                            i.putExtra("tipoCliente", "clienteRegistrado");
-                            startActivity(i);
-
-                            progressDialog.dismiss();
-
-                        }
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-
-        } else {
-
-
-            Query query = dbClientesReferencia.orderByChild("id").equalTo(codigoCliente);
-            query.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    for (DataSnapshot data : snapshot.getChildren()) {
-
-                        progressDialog.setMessage("Cargando informacion del cliente...");
-                        progressDialog.setCanceledOnTouchOutside(false);
-                        progressDialog.show();
-
-                        if (data.child("id").getValue() != null && data.child("razon").getValue() != null && data.child("rfc").getValue() != null &&
-                                data.child("municipio").getValue() != null && data.child("estado").getValue() != null && data.child("calle").getValue() != null
-                                && data.child("colonia").getValue() != null && data.child("numeroExterior").getValue() != null &&
-                                data.child("cp").getValue() != null && data.child("email").getValue() != null && data.child("agenteVenta").getValue() != null
-                                && data.child("agenteCobro").getValue() != null && data.child("ruta").getValue() != null) {
-
-
-
-                            String numeroInterior ="";
-                            String telefono = "";
-
-                            String id = Objects.requireNonNull(data.child("id").getValue()).toString();
-                            String razon = Objects.requireNonNull(data.child("razon").getValue()).toString();
-                            String rfc = Objects.requireNonNull(data.child("rfc").getValue()).toString();
-                            String municipio = Objects.requireNonNull(data.child("municipio").getValue()).toString();
-                            String estado = Objects.requireNonNull(data.child("estado").getValue()).toString();
-                            String calle = Objects.requireNonNull(data.child("calle").getValue()).toString();
-                            String colonia = Objects.requireNonNull(data.child("colonia").getValue()).toString();
-                            String numeroExterior = Objects.requireNonNull(data.child("numeroExterior").getValue()).toString();
-                            if(data.child("numeroInterior").getValue() != null){
-                                numeroInterior = Objects.requireNonNull(data.child("numeroInterior").getValue()).toString();
-                            }
-                            String cp = Objects.requireNonNull(data.child("cp").getValue()).toString();
-                            if(data.child("telefono").getValue() != null) {
-                                telefono = Objects.requireNonNull(data.child("telefono").getValue()).toString();
-                            }
-                            String email = Objects.requireNonNull(data.child("email").getValue()).toString();
-                            String agenteVenta = Objects.requireNonNull(data.child("agenteVenta").getValue()).toString();
-                            String agenteCobro = Objects.requireNonNull(data.child("agenteCobro").getValue()).toString();
-                            String ruta = Objects.requireNonNull(data.child("ruta").getValue()).toString();
-
-                            Cliente cliente = new Cliente(id, razon, rfc, municipio, estado, calle, colonia, numeroExterior,
-                                    numeroInterior, cp, telefono, email, ruta, agenteVenta, agenteCobro);
-
-                            Pedido.setCliente(cliente);
-                            Intent i = new Intent(getApplicationContext(), Menu_pedidos.class);
-                            i.putExtra("seleccionable", false);
-                            i.putExtra("tipoCliente", "clienteRegistrado");
-                            startActivity(i);
-
-                            progressDialog.dismiss();
-                        }
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-
-
-        }
+                progressDialog.dismiss();
+            }
+        });
     }
 
     private void editarCliente() {
@@ -322,11 +198,11 @@ public class Lista_clientes extends AppCompatActivity implements SearchView.OnQu
                                 && data.child("agenteCobro").getValue() != null && data.child("ruta").getValue() != null) {
 
 
-
-                            String numeroInterior ="";
+                            String numeroInterior = "";
                             String telefono = "";
 
                             String id = Objects.requireNonNull(data.child("id").getValue()).toString();
+                            String code = Objects.requireNonNull(data.child("code").getValue()).toString();
                             String razon = Objects.requireNonNull(data.child("razon").getValue()).toString();
                             String rfc = Objects.requireNonNull(data.child("rfc").getValue()).toString();
                             String municipio = Objects.requireNonNull(data.child("municipio").getValue()).toString();
@@ -334,11 +210,11 @@ public class Lista_clientes extends AppCompatActivity implements SearchView.OnQu
                             String calle = Objects.requireNonNull(data.child("calle").getValue()).toString();
                             String colonia = Objects.requireNonNull(data.child("colonia").getValue()).toString();
                             String numeroExterior = Objects.requireNonNull(data.child("numeroExterior").getValue()).toString();
-                            if(data.child("numeroInterior").getValue() != null){
+                            if (data.child("numeroInterior").getValue() != null) {
                                 numeroInterior = Objects.requireNonNull(data.child("numeroInterior").getValue()).toString();
                             }
                             String cp = Objects.requireNonNull(data.child("cp").getValue()).toString();
-                            if(data.child("telefono").getValue() != null) {
+                            if (data.child("telefono").getValue() != null) {
                                 telefono = Objects.requireNonNull(data.child("telefono").getValue()).toString();
                             }
                             String email = Objects.requireNonNull(data.child("email").getValue()).toString();
@@ -346,7 +222,7 @@ public class Lista_clientes extends AppCompatActivity implements SearchView.OnQu
                             String agenteCobro = Objects.requireNonNull(data.child("agenteCobro").getValue()).toString();
                             String ruta = Objects.requireNonNull(data.child("ruta").getValue()).toString();
 
-                            Cliente cliente = new Cliente(id, razon, rfc, municipio, estado, calle, colonia, numeroExterior,
+                            Cliente cliente = new Cliente(Long.getLong(id), code, razon, rfc, municipio, estado, calle, colonia, numeroExterior,
                                     numeroInterior, cp, telefono, email, ruta, agenteVenta, agenteCobro);
 
                             Pedido.setCliente(cliente);
@@ -380,10 +256,11 @@ public class Lista_clientes extends AppCompatActivity implements SearchView.OnQu
                                 data.child("cp").getValue() != null && data.child("email").getValue() != null && data.child("agenteVenta").getValue() != null
                                 && data.child("agenteCobro").getValue() != null && data.child("ruta").getValue() != null) {
 
-                            String numeroInterior ="";
+                            String numeroInterior = "";
                             String telefono = "";
 
                             String id = Objects.requireNonNull(data.child("id").getValue()).toString();
+                            String code = Objects.requireNonNull(data.child("code").getValue()).toString();
                             String razon = Objects.requireNonNull(data.child("razon").getValue()).toString();
                             String rfc = Objects.requireNonNull(data.child("rfc").getValue()).toString();
                             String municipio = Objects.requireNonNull(data.child("municipio").getValue()).toString();
@@ -391,11 +268,11 @@ public class Lista_clientes extends AppCompatActivity implements SearchView.OnQu
                             String calle = Objects.requireNonNull(data.child("calle").getValue()).toString();
                             String colonia = Objects.requireNonNull(data.child("colonia").getValue()).toString();
                             String numeroExterior = Objects.requireNonNull(data.child("numeroExterior").getValue()).toString();
-                            if(data.child("numeroInterior").getValue() != null){
+                            if (data.child("numeroInterior").getValue() != null) {
                                 numeroInterior = Objects.requireNonNull(data.child("numeroInterior").getValue()).toString();
                             }
                             String cp = Objects.requireNonNull(data.child("cp").getValue()).toString();
-                            if(data.child("telefono").getValue() != null) {
+                            if (data.child("telefono").getValue() != null) {
                                 telefono = Objects.requireNonNull(data.child("telefono").getValue()).toString();
                             }
                             String email = Objects.requireNonNull(data.child("email").getValue()).toString();
@@ -403,7 +280,7 @@ public class Lista_clientes extends AppCompatActivity implements SearchView.OnQu
                             String agenteCobro = Objects.requireNonNull(data.child("agenteCobro").getValue()).toString();
                             String ruta = Objects.requireNonNull(data.child("ruta").getValue()).toString();
 
-                            Cliente cliente = new Cliente(id, razon, rfc, municipio, estado, calle, colonia, numeroExterior,
+                            Cliente cliente = new Cliente(Long.getLong(id), code, razon, rfc, municipio, estado, calle, colonia, numeroExterior,
                                     numeroInterior, cp, telefono, email, ruta, agenteVenta, agenteCobro);
 
                             Pedido.setCliente(cliente);
@@ -423,9 +300,6 @@ public class Lista_clientes extends AppCompatActivity implements SearchView.OnQu
             });
 
 
-
-
-
         }
 
         progressDialog.dismiss();
@@ -438,38 +312,34 @@ public class Lista_clientes extends AppCompatActivity implements SearchView.OnQu
         progressDialog.setCanceledOnTouchOutside(false);
         progressDialog.show();
 
-        dbClientesReferencia.addValueEventListener(new ValueEventListener() {
+
+        clienteViewModel.getClientes().observe(this, new Observer<List<Cliente>>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String rfc = "";
-                if (snapshot.exists()) {
-                    for (DataSnapshot data : snapshot.getChildren()) {
+            public void onChanged(List<Cliente> clientes) {
 
-                        String id = Objects.requireNonNull(data.child("id").getValue()).toString();
-                        String nombre = Objects.requireNonNull(data.child("razon").getValue()).toString();
-                        if(data.child("rfc").getValue()!=null){
-                            rfc = Objects.requireNonNull(data.child("rfc").getValue()).toString();
-                        } else {
-                            rfc = "N/A";
-                        }
-                        Item item = new Item();
-                        item.setId(id);
-                        item.setTitulo(nombre);
-                        item.setDato1(rfc);
+                for (Cliente cliente : clientes) {
 
-                        nombresClientes.add(item);
-                        adapter.notifyDataSetChanged();
+                    String id = cliente.getCode();
+                    String nombre = cliente.getRazon();
+                    String rfc = null;
+
+                    if (cliente.getRfc() != null) {
+                        rfc = cliente.getRfc();
+                    } else {
+                        rfc = "N/A";
                     }
-                }
+                    Item item = new Item();
+                    item.setId(id);
+                    item.setTitulo(nombre);
+                    item.setDato1(rfc);
 
+                    nombresClientes.add(item);
+                    adapter.notifyDataSetChanged();
+                }
                 progressDialog.dismiss();
             }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
         });
+
     }
 
     private void eliminarCliente() {
@@ -487,56 +357,56 @@ public class Lista_clientes extends AppCompatActivity implements SearchView.OnQu
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
 
-                if (Tools.isNumeric(idClienteSeleccionado)) {
+                    if (Tools.isNumeric(idClienteSeleccionado)) {
 
-                    int codigoNumerico = Integer.parseInt(idClienteSeleccionado);
-                    Query query = dbClientesReferencia.orderByChild("id").equalTo(codigoNumerico);
-                    query.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            for (DataSnapshot ds : snapshot.getChildren()) {
-                                ds.getRef().removeValue();
+                        int codigoNumerico = Integer.parseInt(idClienteSeleccionado);
+                        Query query = dbClientesReferencia.orderByChild("id").equalTo(codigoNumerico);
+                        query.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                for (DataSnapshot ds : snapshot.getChildren()) {
+                                    ds.getRef().removeValue();
+                                }
                             }
-                        }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
 
-                        }
-                    });
-                    nombresClientes.remove(posicionGlobal);
-                    adapter.notifyDataSetChanged();
-
-                } else {
-
-                    Query query = dbClientesReferencia.orderByChild("id").equalTo(idClienteSeleccionado);
-                    query.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            for (DataSnapshot ds : snapshot.getChildren()) {
-                                ds.getRef().removeValue();
                             }
-                        }
+                        });
+                        nombresClientes.remove(posicionGlobal);
+                        adapter.notifyDataSetChanged();
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
+                    } else {
 
-                        }
-                    });
-                    nombresClientes.remove(posicionGlobal);
-                    adapter.notifyDataSetChanged();
+                        Query query = dbClientesReferencia.orderByChild("id").equalTo(idClienteSeleccionado);
+                        query.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                for (DataSnapshot ds : snapshot.getChildren()) {
+                                    ds.getRef().removeValue();
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
+                        nombresClientes.remove(posicionGlobal);
+                        adapter.notifyDataSetChanged();
+
+                    }
 
                 }
 
-              }
+            });
+            builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
 
-                });
-                builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                    }
-                });
+                }
+            });
 
             AlertDialog dialog = builder.create();
             dialog.show();

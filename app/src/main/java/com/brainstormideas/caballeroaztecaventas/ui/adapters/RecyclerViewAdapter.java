@@ -13,7 +13,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.brainstormideas.caballeroaztecaventas.R;
-import com.brainstormideas.caballeroaztecaventas.data.models.Producto;
 import com.brainstormideas.caballeroaztecaventas.entidad.Item;
 
 import java.util.ArrayList;
@@ -93,7 +92,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter implements View.On
             ivId = itemView.findViewById(R.id.codigo_etx);
             tvTitulo = itemView.findViewById(R.id.nombre_etx);
             tvCodigo = itemView.findViewById(R.id.rfc_etx);
-            row_linearlayout = (LinearLayout) itemView.findViewById(R.id.linearLayout_item);
+            row_linearlayout = itemView.findViewById(R.id.linearLayout_item);
         }
     }
 

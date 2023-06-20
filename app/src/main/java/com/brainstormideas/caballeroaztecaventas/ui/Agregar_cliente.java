@@ -38,11 +38,6 @@ public class Agregar_cliente extends AppCompatActivity {
     ImageButton home_button;
     Button abrir_pedido;
 
-    private FirebaseAuth mAuth;
-    private FirebaseUser user;
-    private FirebaseDatabase firebaseDatabase;
-    private DatabaseReference databaseReference;
-
     private ProgressDialog progressDialog;
 
     @Override
@@ -50,9 +45,6 @@ public class Agregar_cliente extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_agregar_cliente);
 
-        firebaseDatabase = FirebaseDatabase.getInstance();
-        databaseReference = firebaseDatabase.getReference();
-        mAuth = FirebaseAuth.getInstance();
         progressDialog = new ProgressDialog(this);
 
         r_razon_txt = findViewById(R.id.r_razon_txt);
@@ -69,19 +61,9 @@ public class Agregar_cliente extends AppCompatActivity {
         r_ruta_txt = findViewById(R.id.r_ruta_txt);
 
         home_button = findViewById(R.id.home_button);
-        home_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                home();
-            }
-        });
+        home_button.setOnClickListener(view -> home());
         abrir_pedido = findViewById(R.id.abrir_pedido);
-        abrir_pedido.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                abrirPedido();
-            }
-        });
+        abrir_pedido.setOnClickListener(view -> abrirPedido());
 
     }
 
@@ -111,7 +93,7 @@ public class Agregar_cliente extends AppCompatActivity {
             progressDialog.show();
 
             Cliente cliente = new Cliente();
-            cliente.setId("EXPRESS");
+            cliente.setCode("EXPRESS");
             cliente.setRazon(razon);
             cliente.setRfc(rfc);
             cliente.setMunicipio(municipio);

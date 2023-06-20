@@ -1,16 +1,19 @@
 package com.brainstormideas.caballeroaztecaventas.data.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.brainstormideas.caballeroaztecaventas.entidad.ItemProductoPedido;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PedidoFolio {
+public class PedidoFolio implements Parcelable {
 
     String folio;
     String tipo;
 
-    String vendedor;
+    Vendedor vendedor;
     String ruta;
     String tipoDocumento;
 
@@ -33,19 +36,23 @@ public class PedidoFolio {
 
     String fecha;
 
-    List<ItemProductoPedido> listaDeProductos;
+    ArrayList<ItemProductoPedido> listaDeProductos;
 
     String totalSinIVA;
     String totalConIVA;
-    
+
     String historial;
 
-    public PedidoFolio(String folio, String tipo, String vendedor, String ruta, String tipoDocumento,
+    String uriExcel;
+    String uriPdf;
+
+    public PedidoFolio(String folio, String tipo, Vendedor vendedor, String ruta, String tipoDocumento,
                        String codigoCliente, String razon, String rfc, String domicilio,
                        String ciudad, String estado, String telefono, String email,
-                       String total, String observaciones, List<ItemProductoPedido> listaDeProductos,
-                       String status, String numeroFactura, String pagoFactura, String repartidor, String fecha,
-                       String totalSinIVA, String totalConIVA, String historial) {
+                       String total, String observaciones, ArrayList<ItemProductoPedido> listaDeProductos,
+                       String status, String numeroFactura, String pagoFactura, String repartidor,
+                       String fecha, String totalSinIVA, String totalConIVA, String historial,
+                       String uriExcel, String uriPdf) {
         this.folio = folio;
         this.tipo = tipo;
         this.vendedor = vendedor;
@@ -70,9 +77,52 @@ public class PedidoFolio {
         this.totalSinIVA = totalSinIVA;
         this.totalConIVA = totalConIVA;
         this.historial = historial;
+        this.uriExcel = uriExcel;
+        this.uriPdf = uriPdf;
     }
 
-    public PedidoFolio(){
+    public static final Parcelable.Creator<PedidoFolio> CREATOR = new Parcelable.Creator<PedidoFolio>() {
+        @Override
+        public PedidoFolio createFromParcel(Parcel in) {
+            return new PedidoFolio(in);
+        }
+
+        @Override
+        public PedidoFolio[] newArray(int size) {
+            return new PedidoFolio[size];
+        }
+    };
+
+    protected PedidoFolio(Parcel in) {
+        folio = in.readString();
+        tipo = in.readString();
+        vendedor = in.readParcelable(Vendedor.class.getClassLoader());
+        ruta = in.readString();
+        tipoDocumento = in.readString();
+        codigoCliente = in.readString();
+        razon = in.readString();
+        rfc = in.readString();
+        domicilio = in.readString();
+        ciudad = in.readString();
+        estado = in.readString();
+        telefono = in.readString();
+        email = in.readString();
+        total = in.readString();
+        observaciones = in.readString();
+        listaDeProductos = in.createTypedArrayList(ItemProductoPedido.CREATOR);
+        status = in.readString();
+        numeroFactura = in.readString();
+        pagoFactura = in.readString();
+        repartidor = in.readString();
+        fecha = in.readString();
+        totalSinIVA = in.readString();
+        totalConIVA = in.readString();
+        historial = in.readString();
+        uriExcel = in.readString();
+        uriPdf = in.readString();
+    }
+
+    public PedidoFolio() {
 
     }
 
@@ -92,11 +142,11 @@ public class PedidoFolio {
         this.tipo = tipo;
     }
 
-    public String getVendedor() {
+    public Vendedor getVendedor() {
         return vendedor;
     }
 
-    public void setVendedor(String vendedor) {
+    public void setVendedor(Vendedor vendedor) {
         this.vendedor = vendedor;
     }
 
@@ -200,7 +250,7 @@ public class PedidoFolio {
         return listaDeProductos;
     }
 
-    public void setListaDeProductos(List<ItemProductoPedido> listaDeProductos) {
+    public void setListaDeProductos(ArrayList<ItemProductoPedido> listaDeProductos) {
         this.listaDeProductos = listaDeProductos;
     }
 
@@ -266,5 +316,56 @@ public class PedidoFolio {
 
     public void setHistorial(String historial) {
         this.historial = historial;
+    }
+
+    public String getUriExcel() {
+        return uriExcel;
+    }
+
+    public void setUriExcel(String uriExcel) {
+        this.uriExcel = uriExcel;
+    }
+
+    public String getUriPdf() {
+        return uriPdf;
+    }
+
+    public void setUriPdf(String uriPdf) {
+        this.uriPdf = uriPdf;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(folio);
+        parcel.writeString(tipo);
+        parcel.writeParcelable(vendedor, i);
+        parcel.writeString(ruta);
+        parcel.writeString(tipoDocumento);
+        parcel.writeString(codigoCliente);
+        parcel.writeString(razon);
+        parcel.writeString(rfc);
+        parcel.writeString(domicilio);
+        parcel.writeString(ciudad);
+        parcel.writeString(estado);
+        parcel.writeString(telefono);
+        parcel.writeString(email);
+        parcel.writeString(total);
+        parcel.writeString(observaciones);
+        parcel.writeTypedList(listaDeProductos);
+        parcel.writeString(status);
+        parcel.writeString(numeroFactura);
+        parcel.writeString(pagoFactura);
+        parcel.writeString(repartidor);
+        parcel.writeString(fecha);
+        parcel.writeString(totalSinIVA);
+        parcel.writeString(totalConIVA);
+        parcel.writeString(historial);
+        parcel.writeString(uriExcel);
+        parcel.writeString(uriPdf);
     }
 }

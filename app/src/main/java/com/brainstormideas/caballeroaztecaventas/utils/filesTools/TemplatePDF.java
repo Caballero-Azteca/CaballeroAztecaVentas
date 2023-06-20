@@ -1,14 +1,17 @@
 package com.brainstormideas.caballeroaztecaventas.utils.filesTools;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static com.brainstormideas.caballeroaztecaventas.data.models.Pedido.getFolio;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
-import com.brainstormideas.caballeroaztecaventas.ui.PdfViewer;
 import com.brainstormideas.caballeroaztecaventas.R;
 import com.brainstormideas.caballeroaztecaventas.data.models.Pedido;
+import com.brainstormideas.caballeroaztecaventas.ui.PdfViewer;
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
@@ -32,9 +35,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static com.brainstormideas.caballeroaztecaventas.data.models.Pedido.getFolio;
-
 public class TemplatePDF extends PdfPageEventHelper {
 
     private final Context context;
@@ -49,7 +49,7 @@ public class TemplatePDF extends PdfPageEventHelper {
     private Image imagen;
     private BarcodeQRCode barcodeQRCode;
 
-    public TemplatePDF(Context context) throws IOException, BadElementException {
+    public TemplatePDF(Context context) {
         this.context = context;
     }
 
@@ -59,9 +59,9 @@ public class TemplatePDF extends PdfPageEventHelper {
         try {
 
             document = new Document(PageSize.A4);
-            barcodeQRCode = new BarcodeQRCode(getFolio(),  100, 100, null);
+            barcodeQRCode = new BarcodeQRCode(getFolio(), 100, 100, null);
             Image qrcodeImage = barcodeQRCode.getImage();
-            qrcodeImage.setAbsolutePosition(410,702);
+            qrcodeImage.setAbsolutePosition(410, 702);
             qrcodeImage.scalePercent(100);
             pdfWriter = PdfWriter.getInstance(document, new FileOutputStream(pdfFile));
             document.open();
@@ -75,12 +75,12 @@ public class TemplatePDF extends PdfPageEventHelper {
     }
 
     private void createFile() {
-        File folder = new File(context.getExternalFilesDir(null), getFolio() +"pdf.pdf");
+        File folder = new File(context.getExternalFilesDir(null), getFolio() + "pdf.pdf");
 
         if (!folder.exists()) {
             folder.mkdirs();
         }
-        pdfFile = new File(folder, getFolio() +"pdf.pdf");
+        pdfFile = new File(folder, getFolio() + "pdf.pdf");
 
     }
 
@@ -122,7 +122,7 @@ public class TemplatePDF extends PdfPageEventHelper {
         pdfTable.addCell(pdfPCellLogo);
 
         PdfPCell pdfPCellTitulo;
-        pdfPCellTitulo = new PdfPCell(new Phrase(title +"\n" + subtitle+"\n" + "Fecha y hora: " + date, ftitle));
+        pdfPCellTitulo = new PdfPCell(new Phrase(title + "\n" + subtitle + "\n" + "Fecha y hora: " + date, ftitle));
         pdfPCellTitulo.setHorizontalAlignment(Element.ALIGN_JUSTIFIED);
         pdfPCellTitulo.setBorder(Rectangle.NO_BORDER);
         pdfTable.addCell(pdfPCellTitulo);
@@ -225,7 +225,7 @@ public class TemplatePDF extends PdfPageEventHelper {
         pdfTable.addCell(pdfPCell);
 
         PdfPCell pdfPCell1;
-        pdfPCell1 = new PdfPCell(new Phrase(Pedido.getCliente().getId(), fText));
+        pdfPCell1 = new PdfPCell(new Phrase(Pedido.getCliente().getCode(), fText));
         pdfPCell1.setHorizontalAlignment(Element.ALIGN_LEFT);
         pdfTable.addCell(pdfPCell1);
 

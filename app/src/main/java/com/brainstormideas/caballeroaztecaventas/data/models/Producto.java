@@ -6,10 +6,12 @@ import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "productos")
-public class  Producto {
+public class Producto {
     @PrimaryKey
     @NonNull
-    private String id;
+    private Long id;
+    @NonNull
+    private String code;
     private String nombre;
     private String marca;
     private float cca;
@@ -20,8 +22,11 @@ public class  Producto {
     private float lista;
 
     @Ignore
-    public Producto(String id, String nombre, String marca, float cca, float p4, float p3, float p2, float p1, float lista) {
+    public Producto(@NonNull Long id, @NonNull String code, String nombre,
+                    String marca, float cca, float p4, float p3, float p2, float p1,
+                    float lista) {
         this.id = id;
+        this.code = code;
         this.nombre = nombre;
         this.marca = marca;
         this.cca = cca;
@@ -34,6 +39,8 @@ public class  Producto {
 
     public Producto() {
 
+        id = null;
+        code = null;
     }
 
     public String getNombre() {
@@ -52,12 +59,22 @@ public class  Producto {
         this.marca = marca;
     }
 
-    public String getId() {
+    @NonNull
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(@NonNull Long id) {
         this.id = id;
+    }
+
+    @NonNull
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(@NonNull String code) {
+        this.code = code;
     }
 
     public float getCca() {
@@ -108,10 +125,12 @@ public class  Producto {
         this.lista = lista;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "Producto{" +
                 "id=" + id +
+                ", code='" + code + '\'' +
                 ", nombre='" + nombre + '\'' +
                 ", marca='" + marca + '\'' +
                 ", cca=" + cca +

@@ -6,12 +6,20 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
+import com.brainstormideas.caballeroaztecaventas.data.local.dao.ClienteDAO;
 import com.brainstormideas.caballeroaztecaventas.data.local.dao.ProductoDAO;
+import com.brainstormideas.caballeroaztecaventas.data.local.dao.VendedorDAO;
+import com.brainstormideas.caballeroaztecaventas.data.models.Cliente;
 import com.brainstormideas.caballeroaztecaventas.data.models.Producto;
+import com.brainstormideas.caballeroaztecaventas.data.models.Vendedor;
 
-@Database(entities = {Producto.class}, version = 1, exportSchema = false)
+@Database(entities = {Producto.class, Cliente.class, Vendedor.class}, version = 2, exportSchema = false)
 public abstract class RoomLocalDatabase extends RoomDatabase {
     public abstract ProductoDAO productoDAO();
+
+    public abstract ClienteDAO clienteDAO();
+
+    public abstract VendedorDAO vendedorDAO();
 
     private static RoomLocalDatabase instance;
 

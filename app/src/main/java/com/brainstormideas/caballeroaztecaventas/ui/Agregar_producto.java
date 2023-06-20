@@ -1,5 +1,7 @@
 package com.brainstormideas.caballeroaztecaventas.ui;
 
+import static com.brainstormideas.caballeroaztecaventas.ui.MainActivity.isInitialized;
+
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,8 +22,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
-
-import static com.brainstormideas.caballeroaztecaventas.ui.Verificador_precio.isInitialized;
 
 public class Agregar_producto extends AppCompatActivity {
 
@@ -59,31 +59,21 @@ public class Agregar_producto extends AppCompatActivity {
         producto_txt = findViewById(R.id.producto_txt);
         precioLista_txt = findViewById(R.id.precioLista_txt);
 
-        agregar_producto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                agregar_producto();
-            }
-        });
+        agregar_producto.setOnClickListener(v -> agregar_producto());
 
         home_button = findViewById(R.id.home_button);
-        home_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                home();
-            }
-        });
+        home_button.setOnClickListener(v -> home());
     }
 
     private void initializedFirebaseService() {
-        try{
-            if(!isInitialized){
+        try {
+            if (!isInitialized) {
                 FirebaseDatabase.getInstance().setPersistenceEnabled(true);
                 isInitialized = true;
-            }else {
-                Log.d("ATENCION-FIREBASE:","Already Initialized");
+            } else {
+                Log.d("ATENCION-FIREBASE:", "Already Initialized");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -120,7 +110,7 @@ public class Agregar_producto extends AppCompatActivity {
         float lista = Float.parseFloat(precioLista);
 
         Producto nuevoProducto = new Producto();
-        nuevoProducto.setId(codigo);
+        nuevoProducto.setCode(codigo);
         nuevoProducto.setNombre(producto);
         nuevoProducto.setMarca(marca);
         nuevoProducto.setCca(precios(lista).get(0));
