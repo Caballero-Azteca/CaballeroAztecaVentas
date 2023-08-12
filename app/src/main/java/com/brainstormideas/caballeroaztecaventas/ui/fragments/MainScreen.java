@@ -69,6 +69,8 @@ public class MainScreen extends Fragment {
     private Button volver_menu_btn;
     private FloatingActionButton refresh_float_btn;
 
+    private PedidoManager pedidoManager;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main_screen, container, false);
@@ -79,6 +81,8 @@ public class MainScreen extends Fragment {
         Pedido.setListaDeProductos(new ArrayList<>());
         Pedido.preciosConIVA = true;
         Pedido.setTipo("pedido");
+
+        pedidoManager = PedidoManager.getInstance(getContext());
 
         folios = new ArrayList<>();
 
@@ -104,7 +108,7 @@ public class MainScreen extends Fragment {
         }
         usuarioActual_txt = view.findViewById(R.id.rfc_etx);
         cnx_state = view.findViewById(R.id.cnx_state);
-        cnx_state.setText("MODO: Online. V5.0");
+        cnx_state.setText("MODO: Online. 5.3");
 
         String usuarioActualTexto = "Usuario: " + session.getName();
         usuarioActual_txt.setText(usuarioActualTexto);
@@ -167,29 +171,39 @@ public class MainScreen extends Fragment {
     }
 
     private void pedido(String tipoPedido) {
+
         String title = tipoPedido.equals("pedido") ? "Pedido" : "Cotizacion";
         final String[] tiposCliente = new String[]{"Cliente existente", "Cliente express"};
         final int[] checkedItem = {-1};
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle(title);
-        builder.setSingleChoiceItems(tiposCliente, checkedItem[0], (dialog, which) -> {
-            checkedItem[0] = which;
-            Pedido.setTipo(tipoPedido);
-            switch (checkedItem[0]) {
-                case 0:
-                    irMenuClienteExistente();
-                    break;
-                case 1:
-                    irMenuClienteNuevo();
-                    break;
-                default:
-                    irMenuClienteExistente();
-                    break;
-            }
-        });
-        builder.setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss());
-        AlertDialog customAlertDialog = builder.create();
-        customAlertDialog.show();
+
+        if(!pedidoManager.getListaPedidos().isEmpty() && internetManager.isInternetAvaible()){
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+            builder.setTitle("Buzon lleno");
+            builder.setMessage("Ya posee conexion a internet y el buzon tiene aun pedidos en cola.");
+            builder.setNeutralButton("Entendido", (dialogInterface, i) -> {});
+            builder.show();
+        } else {
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+            builder.setTitle(title);
+            builder.setSingleChoiceItems(tiposCliente, checkedItem[0], (dialog, which) -> {
+                checkedItem[0] = which;
+                Pedido.setTipo(tipoPedido);
+                switch (checkedItem[0]) {
+                    case 0:
+                        irMenuClienteExistente();
+                        break;
+                    case 1:
+                        irMenuClienteNuevo();
+                        break;
+                    default:
+                        irMenuClienteExistente();
+                        break;
+                }
+            });
+            builder.setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss());
+            AlertDialog customAlertDialog = builder.create();
+            customAlertDialog.show();
+        }
     }
 
     private void preguntarSiSalir() {
@@ -212,10 +226,11 @@ public class MainScreen extends Fragment {
     private void irMenuClienteExistente() {
         Intent i = new Intent(requireContext(), Lista_clientes.class);
         startActivity(i);
+
     }
 
     private void irMenuClienteNuevo() {
-        Intent i = new Intent(requireContext(), Agregar_cliente.class);
+        Intent i = new Intent(requireContext(), Lista_clientes.class);
         startActivity(i);
     }
 
@@ -282,7 +297,7 @@ public class MainScreen extends Fragment {
     }
 
     public void internetNoDisponibleAviso() {
-        cnx_state.setText("MODO: Offline. V5.0");
+        cnx_state.setText("MODO: Offline. 5.3");
     }
 
 }

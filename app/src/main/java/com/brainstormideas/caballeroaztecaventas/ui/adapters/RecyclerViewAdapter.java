@@ -1,6 +1,5 @@
 package com.brainstormideas.caballeroaztecaventas.ui.adapters;
 
-
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;

@@ -164,7 +164,7 @@ public class Menu_marca extends AppCompatActivity implements SearchView.OnQueryT
                 if (snapshot.exists()) {
                     for (DataSnapshot data : snapshot.getChildren()) {
 
-                        if (data.child("id").getValue() != null && data.child("nombre").getValue() != null
+                        if (data.child("code").getValue() != null && data.child("nombre").getValue() != null
                                 && data.child("marca").getValue() != null && data.child("lista").getValue() != null
                                 && data.child("cca").getValue() != null && data.child("p1").getValue() != null
                                 && data.child("p2").getValue() != null && data.child("p3").getValue() != null
@@ -172,7 +172,7 @@ public class Menu_marca extends AppCompatActivity implements SearchView.OnQueryT
 
                             DecimalFormat df = new DecimalFormat("#.00");
 
-                            String id = Objects.requireNonNull(data.child("id").getValue()).toString();
+                            String code = Objects.requireNonNull(data.child("code").getValue()).toString();
                             String nombre = Objects.requireNonNull(data.child("nombre").getValue()).toString();
                             String marca = Objects.requireNonNull(data.child("marca").getValue()).toString();
 
@@ -198,7 +198,7 @@ public class Menu_marca extends AppCompatActivity implements SearchView.OnQueryT
                                     p4 = Double.parseDouble(Objects.requireNonNull(data.child("p4").getValue()).toString());
                                 }
 
-                                Item item = new Item(id, nombre, marca, df.format(lista),
+                                Item item = new Item(code, nombre, marca, df.format(lista),
                                         df.format(cca), df.format(p1), df.format(p2),
                                         df.format(p3), df.format(p4), null);
 
@@ -208,11 +208,8 @@ public class Menu_marca extends AppCompatActivity implements SearchView.OnQueryT
                             }
                         }
                     }
-
-
                 }
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
@@ -266,7 +263,7 @@ public class Menu_marca extends AppCompatActivity implements SearchView.OnQueryT
         String codigoProductoSeleccionado = ControllerRecyclerViewAdapter.itemSeleccionado.getId();
         Intent i = new Intent(getApplicationContext(), Menu_pedidos.class);
         i.putExtra("seleccionable", true);
-        i.putExtra("codigo", codigoProductoSeleccionado);
+        i.putExtra("code", codigoProductoSeleccionado);
         i.putExtra("tipoCliente", "clienteExpress");
         i.putExtra("ruta", ruta);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |

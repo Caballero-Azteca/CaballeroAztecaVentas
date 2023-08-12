@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.brainstormideas.caballeroaztecaventas.R;
 import com.brainstormideas.caballeroaztecaventas.data.models.Pedido;
 import com.brainstormideas.caballeroaztecaventas.entidad.ItemProductoPedido;
-import com.brainstormideas.caballeroaztecaventas.utils.Tools;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -51,7 +50,7 @@ public class RecyclerViewProductosPedidoAdapter extends RecyclerView.Adapter {
         ItemProductoPedido item = listItems.get(position);
         final Holder Holder = (Holder) holder;
         Holder.tvCantidad.setText(item.getCantidad());
-        Holder.tvCodigo.setText(item.getId());
+        Holder.tvCodigo.setText(item.getCode());
         Holder.tvProducto.setText(item.getNombre());
         Holder.tvPrecio.setText(item.getPrecio());
         Holder.tvTipo.setText(item.getTipo());
@@ -67,26 +66,7 @@ public class RecyclerViewProductosPedidoAdapter extends RecyclerView.Adapter {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        if (Tools.isNumeric(item.getId())) {
-                            int id = Integer.parseInt(item.getId());
-                            Query query = dbProductosReferencia.orderByChild("id").equalTo(id);
-                            query.addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    for (DataSnapshot ds : snapshot.getChildren()) {
-                                        ds.getRef().removeValue();
-                                        Pedido.getListaDeProductos().remove(position - 1);
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-
-                                }
-                            });
-
-                        } else {
-                            Query query = dbProductosReferencia.orderByChild("id").equalTo(item.getId());
+                            Query query = dbProductosReferencia.orderByChild("code").equalTo(item.getCode());
                             query.addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -101,11 +81,10 @@ public class RecyclerViewProductosPedidoAdapter extends RecyclerView.Adapter {
 
                                 }
                             });
-                        }
                         listItems.remove(position);
                         notifyItemRemoved(position);
                         notifyDataSetChanged();
-                    }
+                        }
                 });
                 builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
                     @Override

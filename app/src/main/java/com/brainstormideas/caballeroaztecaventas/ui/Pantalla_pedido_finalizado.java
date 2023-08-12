@@ -22,8 +22,6 @@ import com.google.firebase.database.FirebaseDatabase;
 public class Pantalla_pedido_finalizado extends AppCompatActivity {
 
     Button finalizar_btn;
-    Button otra_vez_btn;
-
     String tipoCliente;
 
     DatabaseReference dbUsuariosReferencia;
@@ -42,11 +40,8 @@ public class Pantalla_pedido_finalizado extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), "Proceso ejecutado.", Toast.LENGTH_LONG).show();
 
         finalizar_btn = findViewById(R.id.finalizar_btn);
-        otra_vez_btn = findViewById(R.id.otra_vez_btn);
 
         finalizar_btn.setOnClickListener(v -> home());
-        otra_vez_btn.setOnClickListener(v -> atras());
-
     }
 
     private void initializedFirebaseService() {
@@ -60,23 +55,6 @@ public class Pantalla_pedido_finalizado extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private void atras() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Ir atras.");
-        builder.setMessage("¿Seguro que desea realizar nuevamente el pedido o quizás algún cambio?");
-        builder.setPositiveButton("Atras", (dialogInterface, i) -> {
-            Intent intent = new Intent(getApplicationContext(), Menu_final.class);
-            intent.putExtra("tipoCliente", "cliente");
-            intent.putExtra("candadoModificar", getIntent().getExtras().getBoolean("candadoModificar", false));
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK |
-                    Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-        });
-        builder.setNegativeButton("Cancelar", (dialogInterface, i) -> dialogInterface.dismiss());
-        builder.show();
     }
 
     private void home() {

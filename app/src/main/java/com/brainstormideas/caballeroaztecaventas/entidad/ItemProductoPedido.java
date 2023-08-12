@@ -6,27 +6,25 @@ import android.widget.ImageButton;
 
 public class ItemProductoPedido implements Parcelable {
 
-    private String id;
+    private String code;
     private String nombre;
     private String marca;
     private String cantidad;
     private String precio;
     private String tipo;
-    private ImageButton btnEliminar;
 
-    public ItemProductoPedido(String id, String nombre, String marca, String cantidad, String precio, String tipo, ImageButton btnEliminar) {
-        this.id = id;
+    public ItemProductoPedido(String code, String nombre, String marca, String cantidad, String precio, String tipo, ImageButton btnEliminar) {
+        this.code = code;
         this.nombre = nombre;
         this.marca = marca;
         this.cantidad = cantidad;
         this.precio = precio;
         this.tipo = tipo;
-        this.btnEliminar = btnEliminar;
     }
 
     protected ItemProductoPedido(Parcel in) {
 
-        id = in.readString();
+        code = in.readString();
         nombre = in.readString();
         marca = in.readString();
         cantidad = in.readString();
@@ -50,12 +48,12 @@ public class ItemProductoPedido implements Parcelable {
 
     }
 
-    public String getId() {
-        return id;
+    public String getCode() {
+        return code;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public String getNombre() {
@@ -100,7 +98,7 @@ public class ItemProductoPedido implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(id);
+        dest.writeString(code);
         dest.writeString(nombre);
         dest.writeString(marca);
         dest.writeString(cantidad);

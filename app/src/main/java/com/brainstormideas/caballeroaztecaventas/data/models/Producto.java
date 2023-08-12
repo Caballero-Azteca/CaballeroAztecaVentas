@@ -1,6 +1,7 @@
 package com.brainstormideas.caballeroaztecaventas.data.models;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
@@ -12,7 +13,9 @@ public class Producto {
     private Long id;
     @NonNull
     private String code;
+    @Nullable
     private String nombre;
+    @Nullable
     private String marca;
     private float cca;
     private float p4;
@@ -22,8 +25,8 @@ public class Producto {
     private float lista;
 
     @Ignore
-    public Producto(@NonNull Long id, @NonNull String code, String nombre,
-                    String marca, float cca, float p4, float p3, float p2, float p1,
+    public Producto(@NonNull Long id, @NonNull String code, @Nullable String nombre,
+                    @Nullable String marca, float cca, float p4, float p3, float p2, float p1,
                     float lista) {
         this.id = id;
         this.code = code;
@@ -43,19 +46,21 @@ public class Producto {
         code = null;
     }
 
+    @Nullable
     public String getNombre() {
         return nombre;
     }
 
-    public void setNombre(String nombre) {
+    public void setNombre(@Nullable String nombre) {
         this.nombre = nombre;
     }
 
+    @Nullable
     public String getMarca() {
         return marca;
     }
 
-    public void setMarca(String marca) {
+    public void setMarca(@Nullable String marca) {
         this.marca = marca;
     }
 

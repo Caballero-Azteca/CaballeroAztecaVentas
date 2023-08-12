@@ -187,13 +187,13 @@ public class Agregar_usuario extends AppCompatActivity {
                         user.updateProfile(profileUpdates);
                         DatabaseReference dbTemporalReference = FirebaseDatabase.getInstance().getReference()
                                 .child("Usuario").child(user.getUid());
-                        dbTemporalReference.child("id").setValue(numeroVendedores);
+                        dbTemporalReference.child("id").setValue(1);
                         dbTemporalReference.child("nombre").setValue(nombre);
                         dbTemporalReference.child("usuario").setValue(usuario);
                         dbTemporalReference.child("email").setValue(email);
                         dbTemporalReference.child("telefono").setValue(telefono);
                         dbTemporalReference.child("password").setValue(pass);
-                        dbTemporalReference.child("folios").push().setValue("folios");
+                        //dbTemporalReference.child("folios").push().setValue("folios");
                         dbTemporalReference.child("permisos").setValue(permisos);
                         Toast.makeText(getApplicationContext(), "Ha sido registrado correctamente.",
                                 Toast.LENGTH_SHORT).show();

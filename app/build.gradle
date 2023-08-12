@@ -60,5 +60,5 @@ dependencies {
     implementation "android.arch.lifecycle:extensions:1.1.1"
 
     // debugImplementation because LeakCanary should only run in debug builds.
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.10'
+    //debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.10'
 }

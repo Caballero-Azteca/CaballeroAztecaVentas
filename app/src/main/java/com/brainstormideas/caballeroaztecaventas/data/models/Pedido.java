@@ -136,4 +136,5 @@ public class Pedido {
     public static void setTotal(String total) {
         Pedido.total = total;
     }
+
 }

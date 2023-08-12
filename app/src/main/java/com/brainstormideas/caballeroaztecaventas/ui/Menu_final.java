@@ -1,7 +1,6 @@
 package com.brainstormideas.caballeroaztecaventas.ui;
 
 import android.Manifest;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -9,6 +8,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
@@ -91,10 +91,14 @@ public class Menu_final extends AppCompatActivity {
     String totalConIVA;
     String totalSinIVA;
 
+    int pedido;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu_final);
+
+        pedido = 0;
 
         candadoModificar = Objects.requireNonNull(getIntent().getExtras()).getBoolean("candadoModificar", true);
 
@@ -143,6 +147,23 @@ public class Menu_final extends AppCompatActivity {
         rbFactura = findViewById(R.id.rbFactura);
         rbRemision = findViewById(R.id.rbRemision);
         rbRemision.setChecked(Pedido.preciosConIVA);
+        rbFactura.setChecked(!Pedido.preciosConIVA);
+
+        rbFactura.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                calcularPreciosTotalSinIVA();
+                tvTotal.setText("TOTAL: " + Pedido.getTotal());
+            }
+        });
+
+        rbRemision.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                calcularPreciosTotalConIVA();
+                tvTotal.setText("TOTAL: " + Pedido.getTotal());
+            }
+        });
 
         pdfview_btn = findViewById(R.id.pdfview_btn);
         pdfview_btn.setOnClickListener(v -> {
@@ -420,7 +441,7 @@ public class Menu_final extends AppCompatActivity {
         for (ItemProductoPedido item : Pedido.getListaDeProductos()) {
             String[] cadena = new String[5];
             cadena[0] = item.getCantidad();
-            cadena[1] = item.getId();
+            cadena[1] = item.getCode();
             cadena[2] = item.getMarca();
             cadena[3] = item.getNombre();
             cadena[4] = item.getPrecio();
@@ -434,12 +455,12 @@ public class Menu_final extends AppCompatActivity {
         ArrayList<ItemProductoPedido> products = new ArrayList<>();
         for (ItemProductoPedido item : Pedido.getListaDeProductos()) {
             String cantidad = item.getCantidad();
-            String id = item.getId();
+            String code = item.getCode();
             String marca = item.getMarca();
             String nombre = item.getNombre();
             String precio = item.getPrecio();
 
-            ItemProductoPedido itemProducto = new ItemProductoPedido(id, nombre, marca, cantidad, precio, null, null);
+            ItemProductoPedido itemProducto = new ItemProductoPedido(code, nombre, marca, cantidad, precio, null, null);
             products.add(itemProducto);
 
         }

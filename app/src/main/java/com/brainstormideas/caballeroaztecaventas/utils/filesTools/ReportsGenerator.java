@@ -186,7 +186,7 @@ public class ReportsGenerator {
 
             Row dataRow = sheet.createRow(i + 17);
             String cantidad = listDeProductos.get(i).getCantidad();
-            String codigo = listDeProductos.get(i).getId();
+            String codigo = listDeProductos.get(i).getCode();
             String marca = listDeProductos.get(i).getMarca();
             String descripcion = listDeProductos.get(i).getNombre();
             String precio = listDeProductos.get(i).getPrecio();

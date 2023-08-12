@@ -41,8 +41,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="30dp"
-        android:layout_weight="1.5"
+        android:layout_marginTop="10dp"
+        android:layout_weight="0.8"
         android:orientation="horizontal">
 
         <Button
@@ -51,16 +51,8 @@
             android:layout_height="match_parent"
             android:layout_margin="6dp"
             android:layout_weight="1"
+            android:background="@drawable/esquinas_redondas"
             android:text="CONFIRMAR PEDIDO (VOLVER AL MENU PRINCIPAL)" />
-
-        <Button
-            android:id="@+id/otra_vez_btn"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_margin="6dp"
-            android:layout_weight="1"
-            android:text="VOLVER AL PEDIDO"
-            android:textSize="12sp" />
 
     </LinearLayout>
 

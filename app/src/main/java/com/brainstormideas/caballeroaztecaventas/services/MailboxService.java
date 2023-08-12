@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import com.brainstormideas.caballeroaztecaventas.data.models.Pedido;
 import com.brainstormideas.caballeroaztecaventas.data.models.PedidoFolio;
 import com.brainstormideas.caballeroaztecaventas.managers.PedidoManager;
+import com.brainstormideas.caballeroaztecaventas.ui.Menu_pedidos;
 import com.brainstormideas.caballeroaztecaventas.utils.InternetManager;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -96,35 +97,16 @@ public class MailboxService extends Service {
 
     public void agregarFolioACliente(PedidoFolio pedidoFolio) {
         DatabaseReference dbReferencia = getDatabaseReferenceByTipoPedido(pedidoFolio.getTipo());
-        dbReferencia.push().setValue(pedidoFolio);
-        Log.e("FOLIO AGREGADO A LA BASE DE DATOS", pedidoFolio.getFolio());
-    }
-
-    private boolean comprobarFolio(String folioRecibido) {
-
-        DatabaseReference dbReferencia = getDatabaseReferenceByTipoPedido(Pedido.getTipo());
-
-        dbReferencia.addValueEventListener(new ValueEventListener() {
+        dbReferencia.push().setValue(pedidoFolio).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    for (DataSnapshot data : snapshot.getChildren()) {
-                        if (data.child("folio").getValue() != null) {
-                            String folioActual = Objects.requireNonNull(data.child("folio").getValue()).toString();
-                            if (folioActual.equals(folioRecibido)) {
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-
+            public void onSuccess(Void unused) {
+                Log.i("EXITO","Pedido ${pedidoFolio.getFolio()} enviado con exito.");}
+        }).addOnFailureListener(new OnFailureListener() {
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
+            public void onFailure(@NonNull Exception e) {
+                Log.i("EXITO","Error al enviar ${pedidoFolio.getFolio()}." + e);}
         });
-        return false;
+        Log.e("FOLIO AGREGADO A LA BASE DE DATOS", pedidoFolio.getFolio());
     }
 
     private void subirArchivo(StorageReference storageRef, Uri fileUri) {
