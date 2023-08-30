@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="Beta 5.3"
+        android:text="Beta 5.4"
         android:textSize="18sp" />
 
     <LinearLayout
@@ -51,7 +51,6 @@
 
         <Button
             android:id="@+id/enter_button"
-            style="@android:style/Widget.DeviceDefault.Button.Colored"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"

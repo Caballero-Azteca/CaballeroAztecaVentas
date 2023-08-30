@@ -70,6 +70,7 @@ public class MainScreen extends Fragment {
     private FloatingActionButton refresh_float_btn;
 
     private PedidoManager pedidoManager;
+    private static String PEDIDO = "pedido";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -79,8 +80,8 @@ public class MainScreen extends Fragment {
         Pedido.setObservaciones("");
         Pedido.setFolio("");
         Pedido.setListaDeProductos(new ArrayList<>());
-        Pedido.preciosConIVA = true;
-        Pedido.setTipo("pedido");
+        Pedido.setPreciosConIVA(true);
+        Pedido.setTipo(PEDIDO);
 
         pedidoManager = PedidoManager.getInstance(getContext());
 
@@ -108,7 +109,7 @@ public class MainScreen extends Fragment {
         }
         usuarioActual_txt = view.findViewById(R.id.rfc_etx);
         cnx_state = view.findViewById(R.id.cnx_state);
-        cnx_state.setText("MODO: Online. 5.3");
+        cnx_state.setText("MODO: Online. 5.4");
 
         String usuarioActualTexto = "Usuario: " + session.getName();
         usuarioActual_txt.setText(usuarioActualTexto);
@@ -128,7 +129,7 @@ public class MainScreen extends Fragment {
         verificador_precio = view.findViewById(R.id.verificador_precio_button);
         exit_button = view.findViewById(R.id.exit_button);
 
-        pedido_btn.setOnClickListener(v -> pedido("pedido"));
+        pedido_btn.setOnClickListener(v -> pedido(PEDIDO));
 
         cotizacion_btn.setOnClickListener(v -> pedido("cotizacion"));
 
@@ -172,7 +173,7 @@ public class MainScreen extends Fragment {
 
     private void pedido(String tipoPedido) {
 
-        String title = tipoPedido.equals("pedido") ? "Pedido" : "Cotizacion";
+        String title = tipoPedido.equals(PEDIDO) ? "Pedido" : "Cotizacion";
         final String[] tiposCliente = new String[]{"Cliente existente", "Cliente express"};
         final int[] checkedItem = {-1};
 
@@ -297,7 +298,7 @@ public class MainScreen extends Fragment {
     }
 
     public void internetNoDisponibleAviso() {
-        cnx_state.setText("MODO: Offline. 5.3");
+        cnx_state.setText("MODO: Offline. 5.4");
     }
 
 }

@@ -48,15 +48,6 @@ public class Pedido {
         editor.commit();
     }
 
-    public void crearPedido(Date fecha, String folio, String documento) {
-
-        Pedido.fecha = fecha;
-        Pedido.folio = folio;
-        Pedido.documento = documento;
-        editor.putInt(ID, id);
-        editor.commit();
-    }
-
     public static String getTipo() {
         return tipo;
     }
@@ -119,6 +110,14 @@ public class Pedido {
 
     public static void setListaDeProductos(ArrayList<ItemProductoPedido> listaDeProductos) {
         Pedido.listaDeProductos = listaDeProductos;
+    }
+
+    public static boolean isPreciosConIVA() {
+        return preciosConIVA;
+    }
+
+    public static void setPreciosConIVA(boolean preciosConIVA) {
+        Pedido.preciosConIVA = preciosConIVA;
     }
 
     public static Date getFecha() {
