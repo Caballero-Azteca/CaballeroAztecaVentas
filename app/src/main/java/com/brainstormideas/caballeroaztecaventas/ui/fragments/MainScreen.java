@@ -15,6 +15,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -48,6 +50,7 @@ public class MainScreen extends Fragment {
     private Button pedido_btn;
     private Button cotizacion_btn;
     private Button bandeja_btn;
+    private Button cobranza_btn;
 
     private Button verificador_precio;
     private Button exit_button;
@@ -124,6 +127,7 @@ public class MainScreen extends Fragment {
         pedido_btn = view.findViewById(R.id.pedido_btn);
         cotizacion_btn = view.findViewById(R.id.cotizacion_btn);
         bandeja_btn = view.findViewById(R.id.bandeja_button);
+        cobranza_btn = view.findViewById(R.id.cobranza_botton);
         refresh_float_btn = view.findViewById(R.id.refresh_float_btn);
 
         verificador_precio = view.findViewById(R.id.verificador_precio_button);
@@ -136,6 +140,8 @@ public class MainScreen extends Fragment {
         verificador_precio.setOnClickListener(view1 -> irVerificadorDePrecio());
 
         bandeja_btn.setOnClickListener(view12 -> irABandejaDeFolios());
+
+        cobranza_btn.setOnClickListener(v -> irACobranza());
 
         refresh_float_btn.setOnClickListener(view13 -> {
             Intent intent = new Intent(getContext(), MailboxService.class);
@@ -255,6 +261,15 @@ public class MainScreen extends Fragment {
         adapter.notifyDataSetChanged();
 
         bandeja_container.setVisibility(View.VISIBLE);
+    }
+
+    private void irACobranza(){
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        CobranzaScreen cobranzaFragment = new CobranzaScreen();
+        transaction.replace(R.id.container, cobranzaFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 
     private void signOut() {

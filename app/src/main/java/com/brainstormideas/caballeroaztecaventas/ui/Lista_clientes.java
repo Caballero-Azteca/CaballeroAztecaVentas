@@ -58,12 +58,6 @@ public class Lista_clientes extends AppCompatActivity implements SearchView.OnQu
     RecyclerView recyclerView;
     RecyclerViewAdapter adapter;
     RecyclerView.LayoutManager manager;
-
-    FirebaseAuth mAuth;
-    FirebaseUser user;
-
-    FirebaseDatabase firebaseDatabase;
-    DatabaseReference databaseReference;
     DatabaseReference dbClientesReferencia;
 
     ArrayList<Item> nombresClientes = new ArrayList<>();

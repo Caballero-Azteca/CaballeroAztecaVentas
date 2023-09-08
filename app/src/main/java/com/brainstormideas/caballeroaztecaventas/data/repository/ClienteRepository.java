@@ -10,6 +10,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.brainstormideas.caballeroaztecaventas.data.local.dao.ClienteDAO;
 import com.brainstormideas.caballeroaztecaventas.data.local.database.RoomLocalDatabase;
 import com.brainstormideas.caballeroaztecaventas.data.models.Cliente;
+import com.brainstormideas.caballeroaztecaventas.data.models.Cobro;
 import com.brainstormideas.caballeroaztecaventas.utils.Tools;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -114,4 +115,11 @@ public class ClienteRepository {
         clienteDAO.insertCliente(cliente);
     }
 
+    public void deleteCobro(Cliente cliente) {
+        clienteDAO.deleteCliente(cliente);
+    }
+
+    public void updateCobro(Cliente cliente) {
+        clienteDAO.updateCliente(cliente);
+    }
 }
