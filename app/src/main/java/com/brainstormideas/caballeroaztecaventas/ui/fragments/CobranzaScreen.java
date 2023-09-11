@@ -14,26 +14,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.brainstormideas.caballeroaztecaventas.R;
 import com.brainstormideas.caballeroaztecaventas.data.models.Cobro;
 import com.brainstormideas.caballeroaztecaventas.ui.adapters.CobroAdapter;
 import com.brainstormideas.caballeroaztecaventas.ui.viewmodels.CobroViewModel;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class CobranzaScreen extends Fragment {
+public class CobranzaScreen extends Fragment implements CobroAdapter.OnItemClickListener {
 
     private Button irAMain;
-
     private CobroViewModel cobroViewModel;
-
     ArrayList<Cobro> cobros = new ArrayList<>();
-
     private ProgressDialog progressDialog;
     CobroAdapter cobroAdapter;
-
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -52,6 +49,17 @@ public class CobranzaScreen extends Fragment {
         cargarCobros();
         RecyclerView recyclerView = view.findViewById(R.id.cobranza_rv);
         cobroAdapter = new CobroAdapter(cobros);
+        cobroAdapter.setOnItemClickListener(cobro -> {
+            DetallesCobroFragment detallesCobroFragment = new DetallesCobroFragment();
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("cobro", (Serializable) cobro);
+            detallesCobroFragment.setArguments(bundle);
+
+            FragmentTransaction transaction = requireFragmentManager().beginTransaction();
+            transaction.replace(R.id.container, detallesCobroFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(cobroAdapter);
 
@@ -75,11 +83,7 @@ public class CobranzaScreen extends Fragment {
 
         cobroViewModel.getCobros().observe(this, cobrosNuevos -> {
             ArrayList<Cobro> nuevaListaCobros = new ArrayList<>(cobros);
-
-            for (Cobro cobro : cobrosNuevos) {
-                nuevaListaCobros.add(cobro);
-            }
-
+            nuevaListaCobros.addAll(cobrosNuevos);
             cobros.clear();
             cobros.addAll(nuevaListaCobros);
             cobroAdapter.notifyDataSetChanged();
@@ -88,4 +92,8 @@ public class CobranzaScreen extends Fragment {
         });
     }
 
+    @Override
+    public void onItemClick(Cobro cobro) {
+
+    }
 }

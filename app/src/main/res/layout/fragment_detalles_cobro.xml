@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.fragments.DetallesCobroFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/textViewFactura"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Factura:"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:textSize="20dp"
+                app:layout_constraintVertical_bias="0.0" />
+
+            <TextView
+                android:id="@+id/textViewNotaCredito"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nota de Crédito:"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewFactura"
+                app:layout_constraintVertical_bias="0.0"
+                android:textSize="20dp"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:id="@+id/textViewCodigoCliente"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Código de Cliente:"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewNotaCredito"
+                app:layout_constraintVertical_bias="0.0"
+                android:textSize="20dp"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:id="@+id/textViewAgente"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Agente:"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewCodigoCliente"
+                app:layout_constraintVertical_bias="0.0"
+                android:textSize="20dp"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:id="@+id/textViewFechaEmision"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Fecha de Emisión:"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewAgente"
+                app:layout_constraintVertical_bias="0.0"
+                android:textSize="20dp"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:id="@+id/textViewRuta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ruta:"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewFechaEmision"
+                app:layout_constraintVertical_bias="0.0"
+                android:textSize="20dp"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:id="@+id/textViewVencidas"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Vencidas:"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewRuta"
+                app:layout_constraintVertical_bias="0.0"
+                android:textSize="20dp"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:id="@+id/textViewNombreCliente"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nombre del Cliente:"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewVencidas"
+                app:layout_constraintVertical_bias="0.0"
+                android:textSize="20dp"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:id="@+id/textViewImporteFactura"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Importe de la Factura:"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewNombreCliente"
+                app:layout_constraintVertical_bias="0.0"
+                android:textSize="20dp"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:id="@+id/textViewImporteNotaCredito"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Importe de la Nota de Crédito:"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewImporteFactura"
+                app:layout_constraintVertical_bias="0.0"
+                android:textSize="20dp"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:id="@+id/textViewImportePorPagar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Importe por Pagar:"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewImporteNotaCredito"
+                app:layout_constraintVertical_bias="0.0"
+                android:textSize="20dp"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:id="@+id/textViewAbono"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Abono:"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewImportePorPagar"
+                app:layout_constraintVertical_bias="0.0"
+                android:textSize="20dp"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:id="@+id/textViewSaldo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Saldo:"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewAbono"
+                app:layout_constraintVertical_bias="0.0"
+                android:textSize="20dp"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:id="@+id/textViewEfectivo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Efectivo:"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewSaldo"
+                app:layout_constraintVertical_bias="0.0"
+                android:textSize="20dp"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:id="@+id/textViewOtros"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Otros:"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewEfectivo"
+                app:layout_constraintVertical_bias="0.0"
+                android:textSize="20dp"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:id="@+id/textViewObservaciones"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Observaciones:"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewOtros"
+                app:layout_constraintVertical_bias="0.0"
+                android:textSize="20dp"
+                android:layout_marginTop="8dp" />
+
+        </LinearLayout>
+
+        <!-- Botón fuera del LinearLayout pero dentro del ConstraintLayout -->
+        <Button
+            android:id="@+id/detalles_back_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Atras"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</FrameLayout>

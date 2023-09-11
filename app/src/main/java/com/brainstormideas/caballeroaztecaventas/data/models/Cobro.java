@@ -5,8 +5,10 @@ import androidx.annotation.Nullable;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
+
 @Entity(tableName = "cobros")
-public class Cobro {
+public class Cobro implements Serializable {
 
     @PrimaryKey
     @NonNull
