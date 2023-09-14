@@ -41,40 +41,29 @@ public class DetallesCobroFragment extends Fragment {
             TextView textViewImportePorPagar = view.findViewById(R.id.textViewImportePorPagar);
             TextView textViewAbono = view.findViewById(R.id.textViewAbono);
             TextView textViewSaldo = view.findViewById(R.id.textViewSaldo);
-            TextView textViewEfectivo = view.findViewById(R.id.textViewEfectivo);
-            TextView textViewOtros = view.findViewById(R.id.textViewOtros);
             TextView textViewObservaciones = view.findViewById(R.id.textViewObservaciones);
             atras_btn = view.findViewById(R.id.detalles_back_btn);
 
             if (cobro != null) {
-                // Asigna los datos a las vistas
-                textViewFactura.setText("Factura: " + cobro.getFactura());
-                textViewNotaCredito.setText("Nota de Crédito: " + cobro.getNotaCredito());
-                textViewCodigoCliente.setText("Código de Cliente: " + cobro.getCodigoCliente());
-                textViewAgente.setText("Agente: " + cobro.getAgente());
-                textViewFechaEmision.setText("Fecha de Emisión: " + cobro.getFechaEmision());
-                textViewRuta.setText("Ruta: " + cobro.getRuta());
+                textViewFactura.setText(cobro.getFactura());
+                textViewNotaCredito.setText( cobro.getNotaCredito());
+                textViewCodigoCliente.setText(cobro.getCodigoCliente());
+                textViewAgente.setText(cobro.getAgente());
+                textViewFechaEmision.setText(cobro.getFechaEmision());
+                textViewRuta.setText(cobro.getRuta());
 
-                // La propiedad 'vencidas' es un boolean, conviértelo a texto para mostrarlo
                 String vencidas = cobro.isVencidas() ? "Sí" : "No";
-                textViewVencidas.setText("Vencidas: " + vencidas);
+                textViewVencidas.setText(vencidas);
 
-                textViewNombreCliente.setText("Nombre del Cliente: " + cobro.getNombreCliente());
-                textViewImporteFactura.setText("Importe de la Factura: " + cobro.getImporteFactura());
-                textViewImporteNotaCredito.setText("Importe de la Nota de Crédito: " + cobro.getImporteNotaCredito());
-                textViewImportePorPagar.setText("Importe por Pagar: " + cobro.getImportePorPagar());
-                textViewAbono.setText("Abono: " + cobro.getAbono());
-                textViewSaldo.setText("Saldo: " + cobro.getSaldo());
-                textViewEfectivo.setText("Efectivo: " + cobro.getEfectivo());
-                textViewOtros.setText("Otros: " + cobro.getOtros());
-                textViewObservaciones.setText("Observaciones: " + cobro.getObservaciones());
+                textViewNombreCliente.setText(cobro.getNombreCliente());
+                textViewImporteFactura.setText(""+ cobro.getImporteFactura());
+                textViewImporteNotaCredito.setText(""+cobro.getImporteNotaCredito());
+                textViewImportePorPagar.setText(""+cobro.getImportePorPagar());
+                textViewAbono.setText(""+cobro.getAbono());
+                textViewSaldo.setText("" + cobro.getSaldo());
+                textViewObservaciones.setText(cobro.getObservaciones());
 
-                atras_btn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        irAtras();
-                    }
-                });
+                atras_btn.setOnClickListener(view1 -> irAtras());
 
             }
         }
@@ -84,6 +73,7 @@ public class DetallesCobroFragment extends Fragment {
 
     private void irAtras(){
         FragmentManager fragmentManager = getFragmentManager();
+        assert fragmentManager != null;
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         CobranzaScreen cobranzaScreen = new CobranzaScreen();
         transaction.replace(R.id.container, cobranzaScreen);

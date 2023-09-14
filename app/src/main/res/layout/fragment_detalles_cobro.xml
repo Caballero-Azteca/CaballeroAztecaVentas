@@ -19,180 +19,452 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:id="@+id/textViewFactura"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Factura:"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:textSize="20dp"
-                app:layout_constraintVertical_bias="0.0" />
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/textViewNotaCredito"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Nota de Crédito:"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewFactura"
-                app:layout_constraintVertical_bias="0.0"
-                android:textSize="20dp"
-                android:layout_marginTop="8dp" />
+                <!-- Label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Factura:"
+                    android:textSize="23dp"
+                    android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/textViewCodigoCliente"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Código de Cliente:"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewNotaCredito"
-                app:layout_constraintVertical_bias="0.0"
-                android:textSize="20dp"
-                android:layout_marginTop="8dp" />
+                <TextView
+                    android:id="@+id/textViewFactura"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="factura"
+                    android:textSize="20dp" />
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/textViewAgente"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Agente:"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewCodigoCliente"
-                app:layout_constraintVertical_bias="0.0"
-                android:textSize="20dp"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/textViewFechaEmision"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Fecha de Emisión:"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewAgente"
-                app:layout_constraintVertical_bias="0.0"
-                android:textSize="20dp"
-                android:layout_marginTop="8dp" />
+                <!-- Label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Nota credito:"
+                    android:textSize="23dp"
+                    android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/textViewRuta"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Ruta:"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewFechaEmision"
-                app:layout_constraintVertical_bias="0.0"
-                android:textSize="20dp"
-                android:layout_marginTop="8dp" />
+                <!-- Valor con margen a la derecha -->
+                <TextView
+                    android:id="@+id/textViewNotaCredito"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="nota credito"
+                    android:textSize="20dp" /> <!-- Puedes ajustar el valor del margen según tus necesidades -->
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/textViewVencidas"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Vencidas:"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewRuta"
-                app:layout_constraintVertical_bias="0.0"
-                android:textSize="20dp"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/textViewNombreCliente"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Nombre del Cliente:"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewVencidas"
-                app:layout_constraintVertical_bias="0.0"
-                android:textSize="20dp"
-                android:layout_marginTop="8dp" />
+                <!-- Label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Codigo cliente:"
+                    android:textSize="23dp"
+                    android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/textViewImporteFactura"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Importe de la Factura:"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewNombreCliente"
-                app:layout_constraintVertical_bias="0.0"
-                android:textSize="20dp"
-                android:layout_marginTop="8dp" />
+                <!-- Valor con margen a la derecha -->
+                <TextView
+                    android:id="@+id/textViewCodigoCliente"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="codigo cliente"
+                    android:textSize="20dp" /> <!-- Puedes ajustar el valor del margen según tus necesidades -->
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/textViewImporteNotaCredito"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Importe de la Nota de Crédito:"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewImporteFactura"
-                app:layout_constraintVertical_bias="0.0"
-                android:textSize="20dp"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/textViewImportePorPagar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Importe por Pagar:"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewImporteNotaCredito"
-                app:layout_constraintVertical_bias="0.0"
-                android:textSize="20dp"
-                android:layout_marginTop="8dp" />
+                <!-- Label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Agente:"
+                    android:textSize="23dp"
+                    android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/textViewAbono"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Abono:"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewImportePorPagar"
-                app:layout_constraintVertical_bias="0.0"
-                android:textSize="20dp"
-                android:layout_marginTop="8dp" />
+                <!-- Valor con margen a la derecha -->
+                <TextView
+                    android:id="@+id/textViewAgente"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="agente"
+                    android:textSize="20dp" /> <!-- Puedes ajustar el valor del margen según tus necesidades -->
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/textViewSaldo"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Saldo:"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewAbono"
-                app:layout_constraintVertical_bias="0.0"
-                android:textSize="20dp"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/textViewEfectivo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Efectivo:"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewSaldo"
-                app:layout_constraintVertical_bias="0.0"
-                android:textSize="20dp"
-                android:layout_marginTop="8dp" />
+                <!-- Label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Fecha de emisión:"
+                    android:textSize="23dp"
+                    android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/textViewOtros"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Otros:"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewEfectivo"
-                app:layout_constraintVertical_bias="0.0"
-                android:textSize="20dp"
-                android:layout_marginTop="8dp" />
+                <!-- Valor con margen a la derecha -->
+                <TextView
+                    android:id="@+id/textViewFechaEmision"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="fecha emision"
+                    android:textSize="20dp" /> <!-- Puedes ajustar el valor del margen según tus necesidades -->
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/textViewObservaciones"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Observaciones:"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewOtros"
-                app:layout_constraintVertical_bias="0.0"
-                android:textSize="20dp"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <!-- Label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Ruta:"
+                    android:textSize="23dp"
+                    android:textStyle="bold" />
+
+                <!-- Valor con margen a la derecha -->
+                <TextView
+                    android:id="@+id/textViewRuta"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="ruta"
+                    android:textSize="20dp" /> <!-- Puedes ajustar el valor del margen según tus necesidades -->
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <!-- Label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Vencidas:"
+                    android:textSize="23dp"
+                    android:textStyle="bold" />
+
+                <!-- Valor con margen a la derecha -->
+                <TextView
+                    android:id="@+id/textViewVencidas"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="vencidas"
+                    android:textSize="20dp" /> <!-- Puedes ajustar el valor del margen según tus necesidades -->
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <!-- Label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Nombre cliente:"
+                    android:textSize="23dp"
+                    android:textStyle="bold" />
+
+                <!-- Valor con margen a la derecha -->
+                <TextView
+                    android:id="@+id/textViewNombreCliente"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="nombre cliente"
+                    android:textSize="20dp" /> <!-- Puedes ajustar el valor del margen según tus necesidades -->
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <!-- Label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Importe factura:"
+                    android:textSize="23dp"
+                    android:textStyle="bold" />
+
+                <!-- Valor con margen a la derecha -->
+                <TextView
+                    android:id="@+id/textViewImporteFactura"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="importe factura"
+                    android:textSize="20dp" /> <!-- Puedes ajustar el valor del margen según tus necesidades -->
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <!-- Label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Importe nota credito:"
+                    android:textSize="20dp"
+                    android:textStyle="bold" />
+
+                <!-- Valor con margen a la derecha -->
+                <TextView
+                    android:id="@+id/textViewImporteNotaCredito"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="importe nota credito"
+                    android:textSize="20dp" /> <!-- Puedes ajustar el valor del margen según tus necesidades -->
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <!-- Label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Importe por pagar:"
+                    android:textSize="20dp"
+                    android:textStyle="bold" />
+
+                <!-- Valor con margen a la derecha -->
+                <TextView
+                    android:id="@+id/textViewImportePorPagar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="importe por pagar"
+                    android:textSize="20dp" /> <!-- Puedes ajustar el valor del margen según tus necesidades -->
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <!-- Label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Abono:"
+                    android:textSize="23dp"
+                    android:textStyle="bold" />
+
+                <!-- Valor con margen a la derecha -->
+                <TextView
+                    android:id="@+id/textViewAbono"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="abono"
+                    android:textSize="20dp" /> <!-- Puedes ajustar el valor del margen según tus necesidades -->
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <!-- Label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Saldo:"
+                    android:textSize="23dp"
+                    android:textStyle="bold" />
+
+                <!-- Valor con margen a la derecha -->
+                <TextView
+                    android:id="@+id/textViewSaldo"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="saldo"
+                    android:textSize="20dp" /> <!-- Puedes ajustar el valor del margen según tus necesidades -->
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <!-- Label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Efectivo:"
+                    android:textSize="23dp"
+                    android:textStyle="bold" />
+
+                <!-- Valor con margen a la derecha -->
+                <TextView
+                    android:id="@+id/textViewEfectivo"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="efectivo"
+                    android:textSize="20dp" /> <!-- Puedes ajustar el valor del margen según tus necesidades -->
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <!-- Label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Otros:"
+                    android:textSize="23dp"
+                    android:textStyle="bold" />
+
+                <!-- Valor con margen a la derecha -->
+                <TextView
+                    android:id="@+id/textViewOtros"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="otros"
+                    android:textSize="20dp" /> <!-- Puedes ajustar el valor del margen según tus necesidades -->
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <!-- Label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Observaciones:"
+                    android:textSize="23dp"
+                    android:textStyle="bold" />
+
+                <!-- Valor con margen a la derecha -->
+                <TextView
+                    android:id="@+id/textViewObservaciones"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="observaciones"
+                    android:textSize="20dp" /> <!-- Puedes ajustar el valor del margen según tus necesidades -->
+            </LinearLayout>
 
         </LinearLayout>
 

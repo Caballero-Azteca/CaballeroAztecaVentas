@@ -40,18 +40,22 @@ public class Cobro implements Serializable {
     @Nullable
     private double saldo;
     @Nullable
-    private double efectivo;
-    @Nullable
-    private double otros;
-    @Nullable
     private String observaciones;
+    @Nullable
+    private double pago;
+    @Nullable
+    private String banco;
+    @Nullable
+    private String metodopago;
+    @Nullable
+    private double numeroCheque;
 
     public Cobro() {
         id = null;
         factura= null;
     }
 
-    public Cobro(@NonNull Long id, @NonNull String factura, @Nullable String notaCredito, @Nullable String codigoCliente, @Nullable String agente, @Nullable String fechaEmision, @Nullable String ruta, @Nullable boolean vencidas, @Nullable String nombreCliente, double importeFactura, double importeNotaCredito, double importePorPagar, double abono, double saldo, double efectivo, double otros, @Nullable String observaciones) {
+    public Cobro(@NonNull Long id, @NonNull String factura, @Nullable String notaCredito, @Nullable String codigoCliente, @Nullable String agente, @Nullable String fechaEmision, @Nullable String ruta, boolean vencidas, @Nullable String nombreCliente, double importeFactura, double importeNotaCredito, double importePorPagar, double abono, double saldo, @Nullable String observaciones, @Nullable double pago, @Nullable String banco, @Nullable String metodopago, double numeroCheque) {
         this.id = id;
         this.factura = factura;
         this.notaCredito = notaCredito;
@@ -66,9 +70,11 @@ public class Cobro implements Serializable {
         this.importePorPagar = importePorPagar;
         this.abono = abono;
         this.saldo = saldo;
-        this.efectivo = efectivo;
-        this.otros = otros;
         this.observaciones = observaciones;
+        this.pago = pago;
+        this.banco = banco;
+        this.metodopago = metodopago;
+        this.numeroCheque = numeroCheque;
     }
 
     @NonNull
@@ -192,22 +198,6 @@ public class Cobro implements Serializable {
         this.saldo = saldo;
     }
 
-    public double getEfectivo() {
-        return efectivo;
-    }
-
-    public void setEfectivo(double efectivo) {
-        this.efectivo = efectivo;
-    }
-
-    public double getOtros() {
-        return otros;
-    }
-
-    public void setOtros(double otros) {
-        this.otros = otros;
-    }
-
     @Nullable
     public String getObservaciones() {
         return observaciones;
@@ -215,6 +205,40 @@ public class Cobro implements Serializable {
 
     public void setObservaciones(@Nullable String observaciones) {
         this.observaciones = observaciones;
+    }
+
+    @Nullable
+    public String getBanco() {
+        return banco;
+    }
+
+    public void setBanco(@Nullable String banco) {
+        this.banco = banco;
+    }
+
+    @Nullable
+    public String getMetodopago() {
+        return metodopago;
+    }
+
+    public void setMetodopago(@Nullable String metodopago) {
+        this.metodopago = metodopago;
+    }
+
+    public double getNumeroCheque() {
+        return numeroCheque;
+    }
+
+    public void setNumeroCheque(double numeroCheque) {
+        this.numeroCheque = numeroCheque;
+    }
+
+    public double getPago() {
+        return pago;
+    }
+
+    public void setPago(double pago) {
+        this.pago = pago;
     }
 
     @Override
@@ -234,9 +258,11 @@ public class Cobro implements Serializable {
                 ", importePorPagar=" + importePorPagar +
                 ", abono=" + abono +
                 ", saldo=" + saldo +
-                ", efectivo=" + efectivo +
-                ", otros=" + otros +
                 ", observaciones='" + observaciones + '\'' +
+                ", pago=" + pago +
+                ", banco='" + banco + '\'' +
+                ", metodopago='" + metodopago + '\'' +
+                ", numeroCheque=" + numeroCheque +
                 '}';
     }
 }

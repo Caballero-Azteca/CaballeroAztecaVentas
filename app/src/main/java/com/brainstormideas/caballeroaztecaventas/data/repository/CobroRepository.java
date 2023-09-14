@@ -52,6 +52,7 @@ public class CobroRepository {
                         List<Cobro> cobros = new ArrayList<>();
                         for (DataSnapshot cobroSnapshot : snapshot.getChildren()) {
                             Cobro cobro = cobroSnapshot.getValue(Cobro.class);
+                            System.out.println(cobro.toString());
                             cobros.add(cobro);
                         }
                         // Combinar los datos locales y de Firebase
