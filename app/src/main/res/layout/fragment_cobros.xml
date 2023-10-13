@@ -4,16 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".ui.fragments.CobranzaScreen">
+    tools:context=".ui.fragments.CobrosFragment">
 
     <LinearLayout
-        android:id="@+id/linearLayout4"
+        android:id="@+id/linearLayout5"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <EditText
@@ -23,7 +21,7 @@
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp"
             android:ems="10"
-            android:hint="Buscar cliente..."
+            android:hint="Buscar..."
             android:inputType="text"
             tools:ignore="MissingConstraints"
             tools:layout_editor_absoluteX="132dp"
@@ -37,12 +35,12 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout4">
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout5">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/cobranza_rv"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:id="@+id/cobros_rv"
+            android:layout_width="409dp"
+            android:layout_height="613dp"
             android:textAlignment="center"
             app:layout_constraintBottom_toTopOf="@+id/back_btn"
             app:layout_constraintEnd_toEndOf="parent"
@@ -50,9 +48,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0"
-            tools:listitem="@layout/item_cliente_con_cobro">
-
-        </androidx.recyclerview.widget.RecyclerView>
+            tools:listitem="@layout/item_cobro"></androidx.recyclerview.widget.RecyclerView>
 
         <Button
             android:id="@+id/back_btn"
@@ -62,6 +58,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,6 +1,5 @@
 package com.brainstormideas.caballeroaztecaventas.ui.fragments;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,6 +13,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -25,7 +25,6 @@ import com.brainstormideas.caballeroaztecaventas.data.models.Pedido;
 import com.brainstormideas.caballeroaztecaventas.data.models.PedidoFolio;
 import com.brainstormideas.caballeroaztecaventas.managers.PedidoManager;
 import com.brainstormideas.caballeroaztecaventas.services.MailboxService;
-import com.brainstormideas.caballeroaztecaventas.ui.Agregar_cliente;
 import com.brainstormideas.caballeroaztecaventas.ui.Lista_clientes;
 import com.brainstormideas.caballeroaztecaventas.ui.Lista_usuarios;
 import com.brainstormideas.caballeroaztecaventas.ui.Login;
@@ -79,6 +78,11 @@ public class MainScreen extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main_screen, container, false);
         FirebaseApp.initializeApp(requireContext());
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+
+        if (activity != null) {
+            activity.getSupportActionBar().setTitle("Caballero Azteca");
+        }
 
         Pedido.setObservaciones("");
         Pedido.setFolio("");
@@ -112,7 +116,7 @@ public class MainScreen extends Fragment {
         }
         usuarioActual_txt = view.findViewById(R.id.rfc_etx);
         cnx_state = view.findViewById(R.id.cnx_state);
-        cnx_state.setText("MODO: Online. 5.4");
+        cnx_state.setText("MODO: Online. 5.4.1");
 
         String usuarioActualTexto = "Usuario: " + session.getName();
         usuarioActual_txt.setText(usuarioActualTexto);
@@ -127,7 +131,7 @@ public class MainScreen extends Fragment {
         pedido_btn = view.findViewById(R.id.pedido_btn);
         cotizacion_btn = view.findViewById(R.id.cotizacion_btn);
         bandeja_btn = view.findViewById(R.id.bandeja_button);
-        cobranza_btn = view.findViewById(R.id.cobranza_botton);
+        //cobranza_btn = view.findViewById(R.id.cobranza_botton);
         refresh_float_btn = view.findViewById(R.id.refresh_float_btn);
 
         verificador_precio = view.findViewById(R.id.verificador_precio_button);
@@ -141,7 +145,7 @@ public class MainScreen extends Fragment {
 
         bandeja_btn.setOnClickListener(view12 -> irABandejaDeFolios());
 
-        cobranza_btn.setOnClickListener(v -> irACobranza());
+        //cobranza_btn.setOnClickListener(v -> irACobranza());
 
         refresh_float_btn.setOnClickListener(view13 -> {
             Intent intent = new Intent(getContext(), MailboxService.class);
@@ -313,7 +317,7 @@ public class MainScreen extends Fragment {
     }
 
     public void internetNoDisponibleAviso() {
-        cnx_state.setText("MODO: Offline. 5.4");
+        cnx_state.setText("MODO: Offline. 5.4.1");
     }
 
 }

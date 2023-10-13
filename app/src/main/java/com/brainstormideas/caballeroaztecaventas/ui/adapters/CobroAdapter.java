@@ -16,7 +16,7 @@ import java.util.List;
 
 public class CobroAdapter extends RecyclerView.Adapter<CobroAdapter.CobroViewHolder> {
 
-    private final List<Cobro> cobros;
+    private List<Cobro> cobros;
     private OnItemClickListener listener;
 
     public CobroAdapter(List<Cobro> cobros) {
@@ -41,10 +41,10 @@ public class CobroAdapter extends RecyclerView.Adapter<CobroAdapter.CobroViewHol
     @Override
     public void onBindViewHolder(@NonNull CobroViewHolder holder, int position) {
         Cobro cobro = cobros.get(position);
-        holder.textFecha.setText("Fecha: " + cobro.getFechaEmision());
-        holder.textFactura.setText("Factura: " + cobro.getFactura());
-        holder.textImporte.setText("Importe: " + cobro.getImportePorPagar());
-        holder.textNombreCliente.setText("Cliente: " + cobro.getNombreCliente());
+        holder.textFecha.setText(cobro.getFechaEmision());
+        holder.textFactura.setText(cobro.getFactura());
+        holder.textImporte.setText(""+cobro.getImportePorPagar());
+        holder.textNombreCliente.setText(cobro.getNombreCliente());
         holder.bind(cobro);
     }
 
@@ -76,5 +76,10 @@ public class CobroAdapter extends RecyclerView.Adapter<CobroAdapter.CobroViewHol
             textNombreCliente = itemView.findViewById(R.id.textNombreCliente);
             this.listener = listener;
         }
+    }
+
+    public void setCobros(List<Cobro> nuevosCobros) {
+        this.cobros = nuevosCobros;
+        notifyDataSetChanged();
     }
 }

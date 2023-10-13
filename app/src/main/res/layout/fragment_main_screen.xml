@@ -176,7 +176,7 @@
                 android:layout_marginBottom="20dp"
                 android:text="BANDEJA"
                 android:textSize="18sp" />
-
+            <!--
             <View
                 android:id="@+id/division4"
                 android:layout_width="match_parent"
@@ -190,7 +190,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
                 android:text="Cobranza"
-                android:textSize="18sp" />
+                android:textSize="18sp" />-->
         </LinearLayout>
 
         <LinearLayout

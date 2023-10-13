@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:background="@drawable/esquinas_redondas_general"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/textIdUnico"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ID: "
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textFactura"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Factura: " />
+
+        <TextView
+            android:id="@+id/textImporte"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Importe: " />
+
+        <TextView
+            android:id="@+id/textFecha"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Fecha: " />
+
+        <TextView
+            android:id="@+id/textBanco"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Banco: " />
+
+        <TextView
+            android:id="@+id/textTipoPago"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tipo de Pago: " />
+
+    </LinearLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

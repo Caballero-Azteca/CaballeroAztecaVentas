@@ -6,8 +6,10 @@ import androidx.annotation.Nullable;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
+
 @Entity(tableName = "clientes")
-public class Cliente {
+public class Cliente implements Serializable {
 
     @PrimaryKey
     @NonNull
@@ -66,10 +68,16 @@ public class Cliente {
         this.agenteCobro = agenteCobro;
     }
 
+    public Cliente(@NonNull String code, @NonNull String razon) {
+        this.code = code;
+        this.razon = razon;
+    }
+
     public Cliente() {
 
         id = null;
         code = null;
+        razon = null;
     }
 
     @NonNull

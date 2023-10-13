@@ -17,12 +17,14 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class ProductoRepository {
 
+    private static ProductoRepository instance;
     private final ProductoDAO productoDAO;
     private final DatabaseReference productoRef;
 
@@ -33,42 +35,18 @@ public class ProductoRepository {
         productoRef = FirebaseDatabase.getInstance().getReference().child("Producto");
     }
 
-    public LiveData<List<Producto>> getAllProductos() {
+    public static synchronized ProductoRepository getInstance(Context context) {
+        if (instance == null) {
+            instance = new ProductoRepository(context);
+        }
+        return instance;
+    }
 
-        final MutableLiveData<List<Producto>> firebaseData = new MutableLiveData<>();
+    public LiveData<List<Producto>> getAllProductos(Context context) {
 
-        new AsyncTask<Void, Void, LiveData<List<Producto>>>() {
-            @Override
-            protected LiveData<List<Producto>> doInBackground(Void... voids) {
-                return productoDAO.getAllProductos();
-            }
+        MutableLiveData<List<Producto>> firebaseData = new MutableLiveData<>();
 
-            @Override
-            protected void onPostExecute(LiveData<List<Producto>> localProductos) {
-                productoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        List<Producto> productos = new ArrayList<>();
-                        for (DataSnapshot productoSnapshot : snapshot.getChildren()) {
-                            Producto producto = productoSnapshot.getValue(Producto.class);
-                            productos.add(producto);
-                        }
-                        // Combinar los datos locales y de Firebase
-                        List<Producto> combinedList = new ArrayList<>();
-                        if (localProductos.getValue() != null) {
-                            combinedList.addAll(localProductos.getValue());
-                        }
-                        combinedList.addAll(productos);
-                        firebaseData.setValue(combinedList);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        // Manejar error
-                    }
-                });
-            }
-        }.execute();
+        new FetchDataAsyncTask(context, firebaseData).execute();
 
         return firebaseData;
     }
@@ -76,7 +54,6 @@ public class ProductoRepository {
     public LiveData<Producto> getProducto(String code) {
         MutableLiveData<Producto> productoLiveData = new MutableLiveData<>();
 
-        // Consultar la caché local primero
         Producto cachedProducto = productoDAO.getProducto(code).getValue();
         if (cachedProducto != null) {
             productoLiveData.setValue(cachedProducto);
@@ -110,5 +87,57 @@ public class ProductoRepository {
 
     public void insertProducto(Producto Producto) {
         productoDAO.insertProducto(Producto);
+    }
+
+    private static class FetchDataAsyncTask extends AsyncTask<Void, Void, LiveData<List<Producto>>> {
+
+        private WeakReference<Context> contextRef;
+        private MutableLiveData<List<Producto>> firebaseData;
+
+        FetchDataAsyncTask(Context context, MutableLiveData<List<Producto>> firebaseData) {
+            this.contextRef = new WeakReference<>(context);
+            this.firebaseData = firebaseData;
+        }
+
+        @Override
+        protected LiveData<List<Producto>> doInBackground(Void... voids) {
+            Context context = contextRef.get();
+            if (context != null) {
+                RoomLocalDatabase database = RoomLocalDatabase.getInstance(context);
+                ProductoDAO productoDAO = database.productoDAO();
+                return productoDAO.getAllProductos();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(LiveData<List<Producto>> localProductos) {
+            Context context = contextRef.get();
+            if (context != null) {
+                DatabaseReference productoRef = FirebaseDatabase.getInstance().getReference().child("Producto");
+                productoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        List<Producto> productos = new ArrayList<>();
+                        for (DataSnapshot productoSnapshot : snapshot.getChildren()) {
+                            Producto producto = productoSnapshot.getValue(Producto.class);
+                            productos.add(producto);
+                        }
+                        // Combinar los datos locales y de Firebase
+                        List<Producto> combinedList = new ArrayList<>();
+                        if (localProductos != null && localProductos.getValue() != null) {
+                            combinedList.addAll(localProductos.getValue());
+                        }
+                        combinedList.addAll(productos);
+                        firebaseData.setValue(combinedList);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        // Manejar error
+                    }
+                });
+            }
+        }
     }
 }

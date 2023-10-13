@@ -16,8 +16,12 @@ public class ProductoViewModel extends ViewModel {
     private final LiveData<List<Producto>> productos;
 
     public ProductoViewModel(Context context) {
-        productoRepository = new ProductoRepository(context);
-        productos = productoRepository.getAllProductos();
+        productoRepository = ProductoRepository.getInstance(context);
+        productos = productoRepository.getAllProductos(context);
+    }
+
+    public static ProductoViewModel getInstance(Context context) {
+        return new ProductoViewModel(context);
     }
 
     public LiveData<List<Producto>> getProductos() {

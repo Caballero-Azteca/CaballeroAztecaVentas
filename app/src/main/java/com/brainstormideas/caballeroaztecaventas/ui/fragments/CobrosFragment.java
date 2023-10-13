@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,53 +22,56 @@ import android.widget.EditText;
 import com.brainstormideas.caballeroaztecaventas.R;
 import com.brainstormideas.caballeroaztecaventas.data.models.Cliente;
 import com.brainstormideas.caballeroaztecaventas.data.models.Cobro;
-import com.brainstormideas.caballeroaztecaventas.ui.adapters.ClienteConCobroAdapter;
 import com.brainstormideas.caballeroaztecaventas.ui.adapters.CobroAdapter;
 import com.brainstormideas.caballeroaztecaventas.ui.viewmodels.CobroViewModel;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
-public class CobranzaScreen extends Fragment implements CobroAdapter.OnItemClickListener {
+
+public class CobrosFragment extends Fragment implements CobroAdapter.OnItemClickListener {
 
     EditText busquedaEtx;
     private Button irAMain;
     private CobroViewModel cobroViewModel;
-    ArrayList<Cliente> clientesConCobros = new ArrayList<>();
+    ArrayList<Cobro> cobros = new ArrayList<>();
     private ProgressDialog progressDialog;
-    ClienteConCobroAdapter clientesConCobroAdapter;
+    CobroAdapter cobroAdapter;
+    private  Cliente cliente;
 
-    public CobranzaScreen() {
+    public CobrosFragment() {
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        View view = inflater.inflate(R.layout.fragment_cobranza_screen, container, false);
+        View view = inflater.inflate(R.layout.fragment_cobros, container, false);
         AppCompatActivity activity = (AppCompatActivity) getActivity();
+
+        Bundle args = getArguments();
+        if (args != null) {
+            cliente = (Cliente) args.getSerializable("cliente");
+        }
 
         irAMain = view.findViewById(R.id.back_btn);
         irAMain.setOnClickListener(view1 -> irAMain());
 
         if (activity != null) {
-            activity.getSupportActionBar().setTitle("Cobranza");
+            activity.getSupportActionBar().setTitle(cliente.getRazon());
         }
+
         progressDialog = new ProgressDialog(getContext());
         cobroViewModel = new CobroViewModel(getContext());
-        cargarClientesConCobros();
-
-        RecyclerView recyclerView = view.findViewById(R.id.cobranza_rv);
-        clientesConCobroAdapter = new ClienteConCobroAdapter(clientesConCobros);
+        cargarCobros();
+        RecyclerView recyclerView = view.findViewById(R.id.cobros_rv);
+        cobroAdapter = new CobroAdapter(cobros);
         busquedaEtx = view.findViewById(R.id.txtCodigo);
-        clientesConCobroAdapter.setOnItemClickListener(cliente -> {
-            abrirCobrosCliente(cliente);
+        cobroAdapter.setOnItemClickListener(cobro -> {
+            abrirCobro(cobro);
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerView.setAdapter(clientesConCobroAdapter);
+        recyclerView.setAdapter(cobroAdapter);
 
         busquedaEtx.addTextChangedListener(new TextWatcher() {
             @Override
@@ -78,20 +82,19 @@ public class CobranzaScreen extends Fragment implements CobroAdapter.OnItemClick
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-                ArrayList<Cliente> cobrosFiltrados = new ArrayList<>();
+                ArrayList<Cobro> cobrosFiltrados = new ArrayList<>();
 
-                if (s.toString().isEmpty()) {
-                    cobrosFiltrados.addAll(clientesConCobros);
+                if (TextUtils.isEmpty(s)) {
+                    cobrosFiltrados.addAll(cobros);
                 } else {
-                    for (Cliente cliente : clientesConCobros) {
-                        if (cliente.getCode().toLowerCase().contains(s)
-                                || cliente.getRazon().toLowerCase().contains(s)) {
-                            cobrosFiltrados.add(cliente);
+                    for (Cobro cobro : cobros) {
+                        if (cobro.getFactura().toLowerCase().contains(s)) {
+                            cobrosFiltrados.add(cobro);
                         }
                     }
                 }
 
-                clientesConCobroAdapter.setClientesConCobros(cobrosFiltrados);
+                cobroAdapter.setCobros(cobrosFiltrados);
             }
 
             @Override
@@ -103,51 +106,45 @@ public class CobranzaScreen extends Fragment implements CobroAdapter.OnItemClick
         return view;
     }
 
-    private void irAMain(){
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        MainScreen mainScreen = new MainScreen();
-        transaction.replace(R.id.container, mainScreen);
+    private void abrirCobro(Cobro cobro) {
+        DetallesCobroFragment detallesCobroFragment = new DetallesCobroFragment();
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("cobro", (Serializable) cobro);
+        bundle.putSerializable("cliente",(Serializable) cliente);
+        detallesCobroFragment.setArguments(bundle);
+        FragmentTransaction transaction = requireFragmentManager().beginTransaction();
+        transaction.replace(R.id.container, detallesCobroFragment);
         transaction.addToBackStack(null);
         transaction.commit();
     }
 
+    private void irAMain(){
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        CobranzaScreen cobranzaScreen = new CobranzaScreen();
+        transaction.replace(R.id.container, cobranzaScreen);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
 
-    private void cargarClientesConCobros() {
+    private void cargarCobros() {
         progressDialog.setMessage("Cargando cobros...");
         progressDialog.setCanceledOnTouchOutside(false);
         progressDialog.show();
 
-        cobroViewModel.getCobros().observe(this, cobros -> {
+        cobroViewModel.getCobros().observe(this, cobrosNuevos -> {
+            ArrayList<Cobro> cobrosClienteEspecifico = new ArrayList<>();
 
-            Set<String> codigoClientes = new HashSet<>();
-
-            for (Cobro cobro : cobros) {
-                String codigoCliente = cobro.getCodigoCliente();
-                String nombreCliente = cobro.getNombreCliente();
-
-                if (!codigoClientes.contains(codigoCliente)) {
-                    codigoClientes.add(codigoCliente);
-                    Cliente cliente = new Cliente(codigoCliente, nombreCliente);
-                    clientesConCobros.add(cliente);
+            for (Cobro cobro : cobrosNuevos) {
+                if (cobro.getCodigoCliente() != null && cobro.getCodigoCliente().equals(cliente.getCode())) {
+                    cobrosClienteEspecifico.add(cobro);
                 }
             }
-            clientesConCobroAdapter.setClientesConCobros(clientesConCobros);
+            cobros.addAll(cobrosClienteEspecifico);
+            cobroAdapter.setCobros(cobros);
             progressDialog.dismiss();
         });
     }
-
-    private void abrirCobrosCliente(Cliente cliente) {
-        CobrosFragment cobrosFragment = new CobrosFragment();
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("cliente", (Serializable) cliente);
-        cobrosFragment.setArguments(bundle);
-        FragmentTransaction transaction = requireFragmentManager().beginTransaction();
-        transaction.replace(R.id.container, cobrosFragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
-    }
-
 
     @Override
     public void onItemClick(Cobro cobro) {

@@ -46,7 +46,7 @@ public class Cobro implements Serializable {
     @Nullable
     private String banco;
     @Nullable
-    private String metodopago;
+    private String metodoPago;
     @Nullable
     private double numeroCheque;
 
@@ -55,7 +55,7 @@ public class Cobro implements Serializable {
         factura= null;
     }
 
-    public Cobro(@NonNull Long id, @NonNull String factura, @Nullable String notaCredito, @Nullable String codigoCliente, @Nullable String agente, @Nullable String fechaEmision, @Nullable String ruta, boolean vencidas, @Nullable String nombreCliente, double importeFactura, double importeNotaCredito, double importePorPagar, double abono, double saldo, @Nullable String observaciones, @Nullable double pago, @Nullable String banco, @Nullable String metodopago, double numeroCheque) {
+    public Cobro(@NonNull Long id, @NonNull String factura, @Nullable String notaCredito, @Nullable String codigoCliente, @Nullable String agente, @Nullable String fechaEmision, @Nullable String ruta, boolean vencidas, @Nullable String nombreCliente, double importeFactura, double importeNotaCredito, double importePorPagar, double abono, double saldo, @Nullable String observaciones, @Nullable double pago, @Nullable String banco, @Nullable String metodoPago, double numeroCheque) {
         this.id = id;
         this.factura = factura;
         this.notaCredito = notaCredito;
@@ -73,7 +73,7 @@ public class Cobro implements Serializable {
         this.observaciones = observaciones;
         this.pago = pago;
         this.banco = banco;
-        this.metodopago = metodopago;
+        this.metodoPago = metodoPago;
         this.numeroCheque = numeroCheque;
     }
 
@@ -217,12 +217,12 @@ public class Cobro implements Serializable {
     }
 
     @Nullable
-    public String getMetodopago() {
-        return metodopago;
+    public String getMetodoPago() {
+        return metodoPago;
     }
 
-    public void setMetodopago(@Nullable String metodopago) {
-        this.metodopago = metodopago;
+    public void setMetodoPago(@Nullable String metodoPago) {
+        this.metodoPago = metodoPago;
     }
 
     public double getNumeroCheque() {
@@ -261,7 +261,7 @@ public class Cobro implements Serializable {
                 ", observaciones='" + observaciones + '\'' +
                 ", pago=" + pago +
                 ", banco='" + banco + '\'' +
-                ", metodopago='" + metodopago + '\'' +
+                ", metodopago='" + metodoPago + '\'' +
                 ", numeroCheque=" + numeroCheque +
                 '}';
     }
