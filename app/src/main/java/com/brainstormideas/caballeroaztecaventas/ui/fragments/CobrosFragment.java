@@ -3,6 +3,8 @@ package com.brainstormideas.caballeroaztecaventas.ui.fragments;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -11,8 +13,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.Editable;
+import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.style.TextAppearanceSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,8 +61,14 @@ public class CobrosFragment extends Fragment implements CobroAdapter.OnItemClick
         irAMain = view.findViewById(R.id.back_btn);
         irAMain.setOnClickListener(view1 -> irAMain());
 
+        ActionBar actionBar = activity.getSupportActionBar();
+
         if (activity != null) {
-            activity.getSupportActionBar().setTitle(cliente.getRazon());
+            if (actionBar != null) {
+                SpannableString spannableString = new SpannableString(cliente.getRazon());
+                spannableString.setSpan(new TextAppearanceSpan(activity, R.style.ActionBarTextStyle), 0, spannableString.length(), 0);
+                actionBar.setTitle(spannableString);
+            }
         }
 
         progressDialog = new ProgressDialog(getContext());
@@ -113,8 +123,8 @@ public class CobrosFragment extends Fragment implements CobroAdapter.OnItemClick
         bundle.putSerializable("cliente",(Serializable) cliente);
         detallesCobroFragment.setArguments(bundle);
         FragmentTransaction transaction = requireFragmentManager().beginTransaction();
-        transaction.replace(R.id.container, detallesCobroFragment);
-        transaction.addToBackStack(null);
+        transaction.replace(R.id.container, detallesCobroFragment, "detallesCobro");
+        transaction.addToBackStack("detallesCobro");
         transaction.commit();
     }
 
@@ -122,8 +132,8 @@ public class CobrosFragment extends Fragment implements CobroAdapter.OnItemClick
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         CobranzaScreen cobranzaScreen = new CobranzaScreen();
-        transaction.replace(R.id.container, cobranzaScreen);
-        transaction.addToBackStack(null);
+        transaction.replace(R.id.container, cobranzaScreen, "cobranza");
+        transaction.addToBackStack("cobranza");
         transaction.commit();
     }
 
@@ -131,8 +141,8 @@ public class CobrosFragment extends Fragment implements CobroAdapter.OnItemClick
         progressDialog.setMessage("Cargando cobros...");
         progressDialog.setCanceledOnTouchOutside(false);
         progressDialog.show();
-
-        cobroViewModel.getCobros().observe(this, cobrosNuevos -> {
+        cobros.clear();
+        cobroViewModel.getCobros().observe(getViewLifecycleOwner(), cobrosNuevos -> {
             ArrayList<Cobro> cobrosClienteEspecifico = new ArrayList<>();
 
             for (Cobro cobro : cobrosNuevos) {
@@ -148,6 +158,5 @@ public class CobrosFragment extends Fragment implements CobroAdapter.OnItemClick
 
     @Override
     public void onItemClick(Cobro cobro) {
-
     }
 }

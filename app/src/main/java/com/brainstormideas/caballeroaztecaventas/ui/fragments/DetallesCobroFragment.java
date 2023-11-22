@@ -2,11 +2,14 @@ package com.brainstormideas.caballeroaztecaventas.ui.fragments;
 
 import android.os.Bundle;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.text.SpannableString;
+import android.text.style.TextAppearanceSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,7 +40,15 @@ public class DetallesCobroFragment extends Fragment {
             cliente = (Cliente) args.getSerializable("cliente");
             Cobro cobro = (Cobro) args.getSerializable("cobro");
 
-            activity.getSupportActionBar().setTitle(cobro.getFactura() +" - "+ cliente.getRazon());
+            ActionBar actionBar = activity.getSupportActionBar();
+
+            if (activity != null) {
+                if (actionBar != null) {
+                    SpannableString spannableString = new SpannableString(cobro.getFactura() +" - "+ cliente.getRazon());
+                    spannableString.setSpan(new TextAppearanceSpan(activity, R.style.ActionBarTextStyle), 0, spannableString.length(), 0);
+                    actionBar.setTitle(spannableString);
+                }
+            }
 
             TextView textViewFactura = view.findViewById(R.id.textViewFactura);
             TextView textViewNotaCredito = view.findViewById(R.id.textViewNotaCredito);
@@ -85,8 +96,6 @@ public class DetallesCobroFragment extends Fragment {
 
                 pagos_btn.setOnClickListener(view1 -> irAPagos(cliente, cobro));
                 atras_btn.setOnClickListener(view1 -> irAtras(cliente));
-
-
             }
         }
 

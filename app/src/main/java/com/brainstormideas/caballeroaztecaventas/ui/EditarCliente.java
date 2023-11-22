@@ -6,7 +6,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -96,7 +95,7 @@ public class EditarCliente extends AppCompatActivity {
     }
 
     private void home() {
-        Intent i = new Intent(getApplicationContext(), Lista_clientes.class);
+        Intent i = new Intent(getApplicationContext(), ListaClientes.class);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
                 Intent.FLAG_ACTIVITY_CLEAR_TASK |
                 Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
@@ -105,7 +104,7 @@ public class EditarCliente extends AppCompatActivity {
 
     private void cargarCliente() {
 
-        String id = ControllerRecyclerViewAdapter.itemSeleccionado.getId();
+        String codigo = ControllerRecyclerViewAdapter.clienteSeleccionado.getCode();
         String razon = Pedido.getCliente().getRazon();
         String rfc = Pedido.getCliente().getRfc();
         String municipio = Pedido.getCliente().getMunicipio();
@@ -118,7 +117,7 @@ public class EditarCliente extends AppCompatActivity {
         String telefono = Pedido.getCliente().getTelefono();
         String correo = Pedido.getCliente().getEmail();
 
-        r_codigo_txt.setText(id);
+        r_codigo_txt.setText(codigo);
         r_razon_txt.setText(razon);
         r_rfc_txt.setText(rfc);
         r_municipio_txt.setText(municipio);
@@ -178,7 +177,7 @@ public class EditarCliente extends AppCompatActivity {
     public void obtenerCliente() {
 
 
-        String codigoCliente = ControllerRecyclerViewAdapter.itemSeleccionado.getId();
+        String codigoCliente = ControllerRecyclerViewAdapter.productoSeleccionado.getCode();
 
         if (Tools.isNumeric(codigoCliente)) {
 

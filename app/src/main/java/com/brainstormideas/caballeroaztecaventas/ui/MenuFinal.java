@@ -5,10 +5,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
@@ -18,7 +16,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
@@ -30,9 +27,9 @@ import com.brainstormideas.caballeroaztecaventas.data.models.Vendedor;
 import com.brainstormideas.caballeroaztecaventas.entidad.ItemProductoPedido;
 import com.brainstormideas.caballeroaztecaventas.services.MailboxService;
 import com.brainstormideas.caballeroaztecaventas.utils.SessionManager;
-import com.brainstormideas.caballeroaztecaventas.utils.filesTools.ImageConverter;
-import com.brainstormideas.caballeroaztecaventas.utils.filesTools.ReportsGenerator;
-import com.brainstormideas.caballeroaztecaventas.utils.filesTools.TemplatePDF;
+import com.brainstormideas.caballeroaztecaventas.utils.filestools.ImageConverter;
+import com.brainstormideas.caballeroaztecaventas.utils.filestools.ReportsGenerator;
+import com.brainstormideas.caballeroaztecaventas.utils.filestools.TemplatePDF;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -49,7 +46,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Objects;
 
-public class Menu_final extends AppCompatActivity {
+public class MenuFinal extends AppCompatActivity {
 
     private static final int REQUEST_CODE = 222;
     private static final int RESQUEST_ASK_CODE_PERMISSION = 111;
@@ -149,20 +146,14 @@ public class Menu_final extends AppCompatActivity {
         rbRemision.setChecked(Pedido.preciosConIVA);
         rbFactura.setChecked(!Pedido.preciosConIVA);
 
-        rbFactura.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                calcularPreciosTotalSinIVA();
-                tvTotal.setText("TOTAL: " + Pedido.getTotal());
-            }
+        rbFactura.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            calcularPreciosTotalSinIVA();
+            tvTotal.setText("TOTAL: " + Pedido.getTotal());
         });
 
-        rbRemision.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                calcularPreciosTotalConIVA();
-                tvTotal.setText("TOTAL: " + Pedido.getTotal());
-            }
+        rbRemision.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            calcularPreciosTotalConIVA();
+            tvTotal.setText("TOTAL: " + Pedido.getTotal());
         });
 
         pdfview_btn = findViewById(R.id.pdfview_btn);
@@ -181,7 +172,7 @@ public class Menu_final extends AppCompatActivity {
 
         btnEnviar = findViewById(R.id.btnEnviar);
         btnEnviar.setOnClickListener(v -> {
-            AlertDialog.Builder builder = new AlertDialog.Builder(Menu_final.this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(MenuFinal.this);
             builder.setTitle("Enviar pedido");
             builder.setMessage("¿Seguro que desea realizar el pedido?\n\n" +
                     "Se generará un folio para su pedido, además se guardara el PDF y el Excel en la nube.\n" +
@@ -332,6 +323,19 @@ public class Menu_final extends AppCompatActivity {
         uris.add(uriExcel);
         uris.add(uriPDF);
 
+        this.grantUriPermission(
+                "com.brainstormideas.caballeroaztecaventas", // Reemplaza con el nombre de tu paquete
+                uriExcel,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+        );
+
+        this.grantUriPermission(
+                "com.brainstormideas.caballeroaztecaventas", // Reemplaza con el nombre de tu paquete
+                uriPDF,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+        );
+
+
         PedidoFolio pedidoFolio = new PedidoFolio(Pedido.getFolio(), Pedido.getTipo(), Pedido.getVendedor(), Pedido.getCliente().getRuta(),
                 Pedido.getDocumento(), Pedido.getCliente().getCode(), Pedido.getCliente().getRazon(), Pedido.getCliente().getRfc(),
                 domicilio, Pedido.getCliente().getMunicipio(), Pedido.getCliente().getEstado(), Pedido.getCliente().getTelefono(),
@@ -407,7 +411,7 @@ public class Menu_final extends AppCompatActivity {
     }
 
     public void modificar() {
-        Intent i = new Intent(getApplicationContext(), Menu_pedidos.class);
+        Intent i = new Intent(getApplicationContext(), MenuPedidos.class);
         calcularPreciosTotalConIVA();
         i.putExtra("tipoCliente", "cliente");
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -415,7 +419,7 @@ public class Menu_final extends AppCompatActivity {
     }
 
     public void pantallaFinal() {
-        Intent i = new Intent(getApplicationContext(), Pantalla_pedido_finalizado.class);
+        Intent i = new Intent(getApplicationContext(), PantallaPedidoFinalizado.class);
         i.putExtra("tipoCliente", "cliente");
         i.putExtra("candadoModificar", false);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -516,15 +520,19 @@ public class Menu_final extends AppCompatActivity {
 
     public void solicitarPermisos() {
 
-        int permisoSMS = ActivityCompat.checkSelfPermission(Menu_final.this, Manifest.permission.INTERNET);
-        int permisoLocation = ActivityCompat.checkSelfPermission(Menu_final.this, Manifest.permission.SEND_SMS);
+        int permisoSMS = ContextCompat.checkSelfPermission(MenuFinal.this, Manifest.permission.INTERNET);
+        int permisoLocation = ContextCompat.checkSelfPermission(MenuFinal.this, Manifest.permission.SEND_SMS);
+        int permisoAlmacenamiento = ContextCompat.checkSelfPermission(MenuFinal.this, Manifest.permission.READ_EXTERNAL_STORAGE);
 
         if (permisoSMS != PackageManager.PERMISSION_GRANTED ||
-                permisoLocation != PackageManager.PERMISSION_GRANTED) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(new String[]{Manifest.permission.INTERNET, Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.READ_PHONE_STATE, Manifest.permission.CALL_PHONE}, RESQUEST_ASK_CODE_PERMISSION);
-            }
+                permisoLocation != PackageManager.PERMISSION_GRANTED ||
+                permisoAlmacenamiento != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(new String[]{Manifest.permission.INTERNET,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.READ_PHONE_STATE,
+                    Manifest.permission.CALL_PHONE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE}, RESQUEST_ASK_CODE_PERMISSION);
         }
     }
 
@@ -544,7 +552,7 @@ public class Menu_final extends AppCompatActivity {
         builder.setPositiveButton("SI", (dialogInterface, i) -> {
             Pedido.setObservaciones(null);
             calcularPreciosTotalConIVA();
-            Intent intent = new Intent(getApplicationContext(), Menu_pedidos.class);
+            Intent intent = new Intent(getApplicationContext(), MenuPedidos.class);
             intent.putExtra("tipoCliente", tipoCliente);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
                     Intent.FLAG_ACTIVITY_CLEAR_TASK |

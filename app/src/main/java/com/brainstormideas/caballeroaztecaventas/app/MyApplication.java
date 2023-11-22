@@ -1,7 +1,6 @@
 package com.brainstormideas.caballeroaztecaventas.app;
 
 import android.content.Context;
-
 import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
 import androidx.room.Room;

@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.brainstormideas.caballeroaztecaventas.R;
 import com.brainstormideas.caballeroaztecaventas.entidad.ItemUsuario;
-import com.brainstormideas.caballeroaztecaventas.ui.Lista_usuarios;
+import com.brainstormideas.caballeroaztecaventas.ui.ListaUsuarios;
 import com.brainstormideas.caballeroaztecaventas.utils.SessionManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class RecyclerViewUsuariosAdapter extends RecyclerView.Adapter {
+public class UsuariosAdapter extends RecyclerView.Adapter {
 
     Context context;
     final ArrayList<ItemUsuario> listItems;
@@ -49,7 +49,7 @@ public class RecyclerViewUsuariosAdapter extends RecyclerView.Adapter {
     EditText nombre_txt;
     EditText usuario_txt;
 
-    public RecyclerViewUsuariosAdapter(Context context, ArrayList<ItemUsuario> listItems) {
+    public UsuariosAdapter(Context context, ArrayList<ItemUsuario> listItems) {
         this.context = context;
         this.listItems = listItems;
     }
@@ -127,7 +127,7 @@ public class RecyclerViewUsuariosAdapter extends RecyclerView.Adapter {
                             vendedor.put("usuario", usuarioEditado);
                             dbUsuariosReferencia.child(user.getUid()).updateChildren(vendedor);
 
-                            Intent i = new Intent(context, Lista_usuarios.class);
+                            Intent i = new Intent(context, ListaUsuarios.class);
                             i.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                             context.startActivity(i);
 
@@ -184,7 +184,7 @@ public class RecyclerViewUsuariosAdapter extends RecyclerView.Adapter {
                             assert user != null;
                             user.delete();
 
-                            Intent i = new Intent(context, Lista_usuarios.class);
+                            Intent i = new Intent(context, ListaUsuarios.class);
                             i.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                             context.startActivity(i);
 

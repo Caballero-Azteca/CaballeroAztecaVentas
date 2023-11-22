@@ -1,38 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/linearLayout_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:baselineAligned="true"
+    android:background="@drawable/custom_border"
     android:orientation="horizontal"
-    android:padding="8dp">
+    android:layout_gravity="center_horizontal"
+    android:layout_margin="8dp">
 
-    <ImageView
-        android:id="@+id/ivfoto"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+
+    <TextView
+        android:id="@+id/textCodigo"
+        android:layout_width="0dp"
+        android:layout_height="80dp"
         android:layout_weight="1"
-        tools:src="@tools:sample/avatars" />
+        android:gravity="center"
+        android:text="TEST"
+        android:textStyle="bold" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
+    <TextView
+        android:id="@+id/textDescripcion"
+        android:layout_width="0dp"
+        android:layout_height="80dp"
+        android:layout_weight="2"
+        android:gravity="center"
+        android:text="TEST TEST TEST" />
+
+    <TextView
+        android:id="@+id/textMarca"
+        android:layout_width="0dp"
+        android:layout_height="80dp"
         android:layout_weight="1"
-        android:orientation="vertical"
-        android:padding="5dp">
+        android:gravity="center"
+        android:text="TEST" />
 
-        <TextView
-            android:id="@+id/nombre_etx"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="@tools:sample/lorem[3]" />
-
-        <TextView
-            android:id="@+id/rfc_etx"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="@tools:sample/lorem[4]" />
-    </LinearLayout>
 </LinearLayout>

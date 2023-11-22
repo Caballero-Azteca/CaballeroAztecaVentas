@@ -20,7 +20,6 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.MenuItemCompat;
@@ -28,42 +27,33 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.brainstormideas.caballeroaztecaventas.R;
-import com.brainstormideas.caballeroaztecaventas.entidad.Item;
+import com.brainstormideas.caballeroaztecaventas.data.models.Producto;
 import com.brainstormideas.caballeroaztecaventas.ui.adapters.ControllerRecyclerViewAdapter;
-import com.brainstormideas.caballeroaztecaventas.ui.adapters.RecyclerViewAdapter;
+import com.brainstormideas.caballeroaztecaventas.ui.adapters.ProductosAdapter;
+import com.brainstormideas.caballeroaztecaventas.ui.viewmodels.ProductoViewModel;
 import com.google.firebase.FirebaseApp;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class Menu_marca extends AppCompatActivity implements SearchView.OnQueryTextListener {
+public class MenuMarca extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
     private Button detalles_btn;
     private ImageButton home_btn;
     private Button agregar_btn;
     private ImageButton direct_home_btn;
 
+    private ProductoViewModel productoViewModel;
+    
     RecyclerView recyclerView;
-    RecyclerViewAdapter adapter;
+    ProductosAdapter adapter;
     RecyclerView.LayoutManager manager;
 
-    String cliente_seleccionado;
-    FirebaseAuth mAuth;
-    FirebaseUser user;
-
-    FirebaseDatabase firebaseDatabase;
-    DatabaseReference databaseReference;
     DatabaseReference dbProductosReferencia;
 
-    ArrayList<Item> nombresProductos = new ArrayList<>();
+    ArrayList<Producto> productos = new ArrayList<>();
 
     ProgressDialog progressDialog;
 
@@ -76,9 +66,10 @@ public class Menu_marca extends AppCompatActivity implements SearchView.OnQueryT
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu_marca);
 
-        initializedFirebaseService();
-        ControllerRecyclerViewAdapter.itemSeleccionado = null;
-        ControllerRecyclerViewAdapter.posicion = 0;
+        ControllerRecyclerViewAdapter.productoSeleccionado = null;
+        ControllerRecyclerViewAdapter.posicionProducto = 0;
+
+        progressDialog = new ProgressDialog(this);
 
         marcaSeleccionada = getIntent().getExtras().get("marca").toString();
         ruta = getIntent().getExtras().get("ruta").toString();
@@ -88,11 +79,10 @@ public class Menu_marca extends AppCompatActivity implements SearchView.OnQueryT
             tipoCliente = "consulta";
         }
 
-
-        getSupportActionBar().setTitle(marcaSeleccionada);
+        Objects.requireNonNull(getSupportActionBar()).setTitle(marcaSeleccionada);
 
         FirebaseApp.initializeApp(this);
-        dbProductosReferencia = FirebaseDatabase.getInstance().getReference().child("Producto");
+        productoViewModel = new ProductoViewModel(getApplicationContext());
         cargarProductosDeMarca(marcaSeleccionada);
 
         detalles_btn = findViewById(R.id.detalles_btn);
@@ -100,16 +90,14 @@ public class Menu_marca extends AppCompatActivity implements SearchView.OnQueryT
         agregar_btn = findViewById(R.id.agregar_btn);
         direct_home_btn = findViewById(R.id.direct_home_btn);
 
-        progressDialog = new ProgressDialog(this);
-
         recyclerView = findViewById(R.id.lista_productos_marca_tv);
         manager = new LinearLayoutManager(this);
-        adapter = new RecyclerViewAdapter(this, nombresProductos);
+        adapter = new ProductosAdapter(this, productos);
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
 
         detalles_btn.setOnClickListener(v -> {
-            if (ControllerRecyclerViewAdapter.itemSeleccionado != null) {
+            if (ControllerRecyclerViewAdapter.productoSeleccionado != null) {
                 detallesDeProducto();
             } else {
                 Toast.makeText(getApplicationContext(), "Seleccione un articulo primero", Toast.LENGTH_LONG).show();
@@ -117,9 +105,9 @@ public class Menu_marca extends AppCompatActivity implements SearchView.OnQueryT
         });
 
         agregar_btn.setOnClickListener(v -> {
-            if (ControllerRecyclerViewAdapter.itemSeleccionado != null) {
+            if (ControllerRecyclerViewAdapter.productoSeleccionado != null) {
                 obtenerProducto();
-                Toast.makeText(getApplicationContext(), "Articulo seleccionado: " + ControllerRecyclerViewAdapter.itemSeleccionado.getTitulo(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Articulo seleccionado: " + ControllerRecyclerViewAdapter.productoSeleccionado.getNombre(), Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(getApplicationContext(), "Seleccione un articulo primero", Toast.LENGTH_LONG).show();
             }
@@ -136,88 +124,35 @@ public class Menu_marca extends AppCompatActivity implements SearchView.OnQueryT
 
     }
 
-    private void initializedFirebaseService() {
-        try {
-            if (!isInitialized) {
-                FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-                isInitialized = true;
-            } else {
-                Log.d("ATENCION-FIREBASE:", "Already Initialized");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     private void goHome() {
         Intent i = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(i);
     }
 
-    private void cargarProductosDeMarca(final String marcaIngresada) {
+    private void cargarProductosDeMarca(String marcaEspecifica) {
+        
+        progressDialog.setMessage("Cargando productos...");
+        progressDialog.setCanceledOnTouchOutside(false);
+        progressDialog.show();
 
+        productos.clear();
+        productoViewModel.getProductos().observe(this, productosNuevos -> {
 
-        dbProductosReferencia.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
+            ArrayList<Producto> productosMarcaEspecifica = new ArrayList<>();
 
-                if (snapshot.exists()) {
-                    for (DataSnapshot data : snapshot.getChildren()) {
-
-                        if (data.child("code").getValue() != null && data.child("nombre").getValue() != null
-                                && data.child("marca").getValue() != null && data.child("lista").getValue() != null
-                                && data.child("cca").getValue() != null && data.child("p1").getValue() != null
-                                && data.child("p2").getValue() != null && data.child("p3").getValue() != null
-                                && data.child("p4").getValue() != null) {
-
-                            DecimalFormat df = new DecimalFormat("#.00");
-
-                            String code = Objects.requireNonNull(data.child("code").getValue()).toString();
-                            String nombre = Objects.requireNonNull(data.child("nombre").getValue()).toString();
-                            String marca = Objects.requireNonNull(data.child("marca").getValue()).toString();
-
-                            double lista = 0.0;
-                            double cca = 0.0;
-                            double p1 = 0.0;
-                            double p2 = 0.0;
-                            double p3 = 0.0;
-                            double p4 = 0.0;
-
-                            if (marcaIngresada.equals(marca)) {
-
-                                if (data.child("lista").getValue() != null
-                                        && data.child("cca").getValue() != null && data.child("p1").getValue() != null
-                                        && data.child("p2").getValue() != null && data.child("p3").getValue() != null
-                                        && data.child("p4").getValue() != null) {
-
-                                    lista = Double.parseDouble(Objects.requireNonNull(data.child("lista").getValue()).toString());
-                                    cca = Double.parseDouble(Objects.requireNonNull(data.child("cca").getValue()).toString());
-                                    p1 = Double.parseDouble(Objects.requireNonNull(data.child("p1").getValue()).toString());
-                                    p2 = Double.parseDouble(Objects.requireNonNull(data.child("p2").getValue()).toString());
-                                    p3 = Double.parseDouble(Objects.requireNonNull(data.child("p3").getValue()).toString());
-                                    p4 = Double.parseDouble(Objects.requireNonNull(data.child("p4").getValue()).toString());
-                                }
-
-                                Item item = new Item(code, nombre, marca, df.format(lista),
-                                        df.format(cca), df.format(p1), df.format(p2),
-                                        df.format(p3), df.format(p4), null);
-
-                                nombresProductos.add(item);
-                                adapter.notifyDataSetChanged();
-
-                            }
-                        }
-                    }
+            for (Producto producto : productosNuevos) {
+                if (producto.getMarca().equals(marcaEspecifica)) {
+                    productosMarcaEspecifica.add(producto);
                 }
             }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
 
-            }
+            productos.addAll(productosMarcaEspecifica);
+            adapter.setProductos(productos);
+            adapter.notifyDataSetChanged();
+            progressDialog.dismiss();
         });
-
-
     }
+
 
     private void detallesDeProducto() {
 
@@ -232,17 +167,17 @@ public class Menu_marca extends AppCompatActivity implements SearchView.OnQueryT
         final TextView marcaTv = viewInflated.findViewById(R.id.marcaTv);
         final ListView preciosLv = viewInflated.findViewById(R.id.preciosLv);
 
-        productoNameTv.setText("PRODUCTO: " + ControllerRecyclerViewAdapter.itemSeleccionado.getTitulo());
-        cotigoTv.setText("CODIGO: " + ControllerRecyclerViewAdapter.itemSeleccionado.getId());
-        marcaTv.setText("MARCA: " + ControllerRecyclerViewAdapter.itemSeleccionado.getDato1());
+        productoNameTv.setText("PRODUCTO: " + ControllerRecyclerViewAdapter.productoSeleccionado.getNombre());
+        cotigoTv.setText("CODIGO: " + ControllerRecyclerViewAdapter.productoSeleccionado.getCode());
+        marcaTv.setText("MARCA: " + ControllerRecyclerViewAdapter.productoSeleccionado.getMarca());
 
         ArrayList<String> precios = new ArrayList<String>();
-        precios.add("P3: " + ControllerRecyclerViewAdapter.itemSeleccionado.getDato6());
-        precios.add("LISTA: " + ControllerRecyclerViewAdapter.itemSeleccionado.getDato2());
-        precios.add("P1: " + ControllerRecyclerViewAdapter.itemSeleccionado.getDato4());
-        precios.add("P2: " + ControllerRecyclerViewAdapter.itemSeleccionado.getDato5());
-        precios.add("P4: " + ControllerRecyclerViewAdapter.itemSeleccionado.getDato7());
-        precios.add("CCA: " + ControllerRecyclerViewAdapter.itemSeleccionado.getDato3());
+        precios.add("P3: " + ControllerRecyclerViewAdapter.productoSeleccionado.getP3());
+        precios.add("LISTA: " + ControllerRecyclerViewAdapter.productoSeleccionado.getLista());
+        precios.add("P1: " + ControllerRecyclerViewAdapter.productoSeleccionado.getP1());
+        precios.add("P2: " + ControllerRecyclerViewAdapter.productoSeleccionado.getP2());
+        precios.add("P4: " + ControllerRecyclerViewAdapter.productoSeleccionado.getP4());
+        precios.add("CCA: " + ControllerRecyclerViewAdapter.productoSeleccionado.getCca());
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, precios);
         preciosLv.setAdapter(adapter);
@@ -260,8 +195,8 @@ public class Menu_marca extends AppCompatActivity implements SearchView.OnQueryT
 
     private void obtenerProducto() {
 
-        String codigoProductoSeleccionado = ControllerRecyclerViewAdapter.itemSeleccionado.getId();
-        Intent i = new Intent(getApplicationContext(), Menu_pedidos.class);
+        String codigoProductoSeleccionado = ControllerRecyclerViewAdapter.productoSeleccionado.getCode();
+        Intent i = new Intent(getApplicationContext(), MenuPedidos.class);
         i.putExtra("seleccionable", true);
         i.putExtra("code", codigoProductoSeleccionado);
         i.putExtra("tipoCliente", "clienteExpress");
@@ -290,7 +225,7 @@ public class Menu_marca extends AppCompatActivity implements SearchView.OnQueryT
                 break;
             case "MenuPedidos":
 
-                Intent int2 = new Intent(getApplicationContext(), Menu_pedidos.class);
+                Intent int2 = new Intent(getApplicationContext(), MenuPedidos.class);
                 int2.putExtra("tipoCliente", tipoCliente);
                 int2.putExtra("ruta", ruta);
                 int2.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
@@ -322,7 +257,7 @@ public class Menu_marca extends AppCompatActivity implements SearchView.OnQueryT
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
-                adapter.setFilter(nombresProductos);
+                adapter.setProductos(productos);
                 adapter.notifyDataSetChanged();
                 return true;
             }
@@ -338,8 +273,8 @@ public class Menu_marca extends AppCompatActivity implements SearchView.OnQueryT
     @Override
     public boolean onQueryTextChange(String newText) {
         try {
-            ArrayList<Item> listaFiltrada = filter(nombresProductos, newText);
-            adapter.setFilter(listaFiltrada);
+            ArrayList<Producto> listaFiltrada = filter(productos, newText);
+            adapter.setProductos(listaFiltrada);
             adapter.notifyDataSetChanged();
         } catch (Exception e) {
             e.printStackTrace();
@@ -347,14 +282,14 @@ public class Menu_marca extends AppCompatActivity implements SearchView.OnQueryT
         return false;
     }
 
-    private ArrayList<Item> filter(ArrayList<Item> items, String texto) {
-        ArrayList<Item> listaFiltrada = new ArrayList<>();
+    private ArrayList<Producto> filter(ArrayList<Producto> productos, String texto) {
+        ArrayList<Producto> listaFiltrada = new ArrayList<>();
         try {
             String textoMiniscula = texto.toLowerCase();
-            for (Item item : items) {
-                String itemFilter = item.getTitulo().toLowerCase();
+            for (Producto producto : productos) {
+                String itemFilter = producto.getNombre().toLowerCase();
                 if (itemFilter.contains(textoMiniscula)) {
-                    listaFiltrada.add(item);
+                    listaFiltrada.add(producto);
                 }
             }
         } catch (Exception e) {

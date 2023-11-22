@@ -6,7 +6,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -23,7 +22,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 
-public class Agregar_producto extends AppCompatActivity {
+public class AgregarProducto extends AppCompatActivity {
 
     private ImageButton home_button;
     private Button agregar_producto;
@@ -46,7 +45,6 @@ public class Agregar_producto extends AppCompatActivity {
         setContentView(R.layout.activity_agregar_producto);
 
         getSupportActionBar().setTitle("AGREGAR PRODUCTO");
-        initializedFirebaseService();
 
         firebaseDatabase = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference();
@@ -63,19 +61,6 @@ public class Agregar_producto extends AppCompatActivity {
 
         home_button = findViewById(R.id.home_button);
         home_button.setOnClickListener(v -> home());
-    }
-
-    private void initializedFirebaseService() {
-        try {
-            if (!isInitialized) {
-                FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-                isInitialized = true;
-            } else {
-                Log.d("ATENCION-FIREBASE:", "Already Initialized");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     private void agregar_producto() {
@@ -132,7 +117,7 @@ public class Agregar_producto extends AppCompatActivity {
     }
 
     private void home() {
-        Intent i = new Intent(getApplicationContext(), Verificador_precio.class);
+        Intent i = new Intent(getApplicationContext(), VerificadorPrecio.class);
         startActivity(i);
     }
 

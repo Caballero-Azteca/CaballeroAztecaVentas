@@ -1,12 +1,8 @@
 package com.brainstormideas.caballeroaztecaventas.ui;
 
-import static com.brainstormideas.caballeroaztecaventas.ui.MainActivity.isInitialized;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageButton;
 
@@ -43,7 +39,6 @@ public class Marcas extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_marcas);
 
-        initializedFirebaseService();
         marcasReferencia = FirebaseDatabase.getInstance().getReference().child("Producto");
         cargarMarcas();
 
@@ -66,20 +61,6 @@ public class Marcas extends AppCompatActivity {
 
         home_button = findViewById(R.id.home_button);
         home_button.setOnClickListener(view -> home());
-
-    }
-
-    private void initializedFirebaseService() {
-        try {
-            if (!isInitialized) {
-                FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-                isInitialized = true;
-            } else {
-                Log.d("ATENCION-FIREBASE:", "Already Initialized");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     public void cargarMarcas() {
@@ -120,7 +101,7 @@ public class Marcas extends AppCompatActivity {
 
     private void irMarca(String marca) {
 
-        Intent i = new Intent(getApplicationContext(), Menu_marca.class);
+        Intent i = new Intent(getApplicationContext(), MenuMarca.class);
         i.putExtra("marca", marca);
         i.putExtra("ruta", ruta);
         i.putExtra("tipoCliente", tipoCliente);
@@ -137,7 +118,7 @@ public class Marcas extends AppCompatActivity {
 
             case "verificadorPrecio":
 
-                Intent int1 = new Intent(getApplicationContext(), Verificador_precio.class);
+                Intent int1 = new Intent(getApplicationContext(), VerificadorPrecio.class);
                 int1.putExtra("tipoCliente", tipoCliente);
                 int1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
                         Intent.FLAG_ACTIVITY_CLEAR_TASK |
@@ -147,7 +128,7 @@ public class Marcas extends AppCompatActivity {
                 break;
             case "MenuPedidos":
 
-                Intent int2 = new Intent(getApplicationContext(), Menu_pedidos.class);
+                Intent int2 = new Intent(getApplicationContext(), MenuPedidos.class);
                 int2.putExtra("tipoCliente", tipoCliente);
                 int2.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
                         Intent.FLAG_ACTIVITY_CLEAR_TASK |
@@ -160,8 +141,6 @@ public class Marcas extends AppCompatActivity {
 
                 break;
         }
-
-
     }
 
     private boolean existeMarca(String marca) {

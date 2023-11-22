@@ -44,7 +44,11 @@ public class CobroAdapter extends RecyclerView.Adapter<CobroAdapter.CobroViewHol
         holder.textFecha.setText(cobro.getFechaEmision());
         holder.textFactura.setText(cobro.getFactura());
         holder.textImporte.setText(""+cobro.getImportePorPagar());
-        holder.textNombreCliente.setText(cobro.getNombreCliente());
+        if(cobro.isVencidas()){
+            holder.textVencida.setText("Vencida");
+        } else {
+            holder.textVencida.setText("No vencida");
+        }
         holder.bind(cobro);
     }
 
@@ -57,7 +61,7 @@ public class CobroAdapter extends RecyclerView.Adapter<CobroAdapter.CobroViewHol
         TextView textFecha;
         TextView textFactura;
         TextView textImporte;
-        TextView textNombreCliente;
+        TextView textVencida;
         private OnItemClickListener listener;
 
         public void bind(final Cobro cobro) {
@@ -73,7 +77,7 @@ public class CobroAdapter extends RecyclerView.Adapter<CobroAdapter.CobroViewHol
             textFecha = itemView.findViewById(R.id.textFecha);
             textFactura = itemView.findViewById(R.id.textFactura);
             textImporte = itemView.findViewById(R.id.textImporte);
-            textNombreCliente = itemView.findViewById(R.id.textNombreCliente);
+            textVencida = itemView.findViewById(R.id.textVencida);
             this.listener = listener;
         }
     }

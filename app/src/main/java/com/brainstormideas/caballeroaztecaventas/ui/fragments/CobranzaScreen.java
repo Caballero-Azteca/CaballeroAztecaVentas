@@ -107,8 +107,19 @@ public class CobranzaScreen extends Fragment implements CobroAdapter.OnItemClick
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         MainScreen mainScreen = new MainScreen();
-        transaction.replace(R.id.container, mainScreen);
-        transaction.addToBackStack(null);
+        transaction.replace(R.id.container, mainScreen,"main");
+        transaction.addToBackStack("main");
+        transaction.commit();
+    }
+
+    private void abrirCobrosCliente(Cliente cliente) {
+        CobrosFragment cobrosFragment = new CobrosFragment();
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("cliente", (Serializable) cliente);
+        cobrosFragment.setArguments(bundle);
+        FragmentTransaction transaction = requireFragmentManager().beginTransaction();
+        transaction.replace(R.id.container, cobrosFragment, "cobro");
+        transaction.addToBackStack("cobro");
         transaction.commit();
     }
 
@@ -117,7 +128,7 @@ public class CobranzaScreen extends Fragment implements CobroAdapter.OnItemClick
         progressDialog.setMessage("Cargando cobros...");
         progressDialog.setCanceledOnTouchOutside(false);
         progressDialog.show();
-
+        clientesConCobros.clear();
         cobroViewModel.getCobros().observe(this, cobros -> {
 
             Set<String> codigoClientes = new HashSet<>();
@@ -136,18 +147,6 @@ public class CobranzaScreen extends Fragment implements CobroAdapter.OnItemClick
             progressDialog.dismiss();
         });
     }
-
-    private void abrirCobrosCliente(Cliente cliente) {
-        CobrosFragment cobrosFragment = new CobrosFragment();
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("cliente", (Serializable) cliente);
-        cobrosFragment.setArguments(bundle);
-        FragmentTransaction transaction = requireFragmentManager().beginTransaction();
-        transaction.replace(R.id.container, cobrosFragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
-    }
-
 
     @Override
     public void onItemClick(Cobro cobro) {

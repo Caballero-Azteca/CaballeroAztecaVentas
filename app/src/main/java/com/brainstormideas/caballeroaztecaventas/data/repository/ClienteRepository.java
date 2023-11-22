@@ -77,7 +77,6 @@ public class ClienteRepository {
     public LiveData<Cliente> getCliente(String code) {
         MutableLiveData<Cliente> clienteLiveData = new MutableLiveData<>();
 
-        // Consultar la caché local primero
         Cliente cachedCliente = clienteDAO.getCliente(code).getValue();
         if (cachedCliente != null) {
             clienteLiveData.setValue(cachedCliente);
@@ -91,7 +90,7 @@ public class ClienteRepository {
                             for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                                 Cliente cliente = snapshot.getValue(Cliente.class);
                                 clienteLiveData.postValue(cliente);
-                                break;  // Solo obtenemos el primer Cliente encontrado
+                                break;
                             }
                         } else {
                             clienteLiveData.postValue(null);

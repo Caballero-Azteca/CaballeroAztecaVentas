@@ -1,5 +1,4 @@
 package com.brainstormideas.caballeroaztecaventas.firebase;
 
-public class FirebaseUserManager {
-
+public class ProductoFirebase {
 }

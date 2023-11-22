@@ -183,7 +183,6 @@ public class PagoRepository {
     public void deletePago(Pago pago) {
         pagoDAO.deletePago(pago);
     }
-
     public void updatePago(Pago pago) {
         pagoDAO.updatePago(pago);
     }

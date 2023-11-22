@@ -1,7 +1,6 @@
 package com.brainstormideas.caballeroaztecaventas.ui;
 
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -20,15 +19,13 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.MenuItemCompat;
-import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.brainstormideas.caballeroaztecaventas.R;
 import com.brainstormideas.caballeroaztecaventas.data.models.Producto;
-import com.brainstormideas.caballeroaztecaventas.entidad.Item;
 import com.brainstormideas.caballeroaztecaventas.ui.adapters.ControllerRecyclerViewAdapter;
-import com.brainstormideas.caballeroaztecaventas.ui.adapters.RecyclerViewAdapter;
+import com.brainstormideas.caballeroaztecaventas.ui.adapters.ProductosAdapter;
 import com.brainstormideas.caballeroaztecaventas.ui.viewmodels.ProductoViewModel;
 import com.brainstormideas.caballeroaztecaventas.utils.SessionManager;
 import com.google.firebase.auth.FirebaseAuth;
@@ -36,11 +33,10 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Verificador_precio extends AppCompatActivity implements SearchView.OnQueryTextListener {
+public class VerificadorPrecio extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
     ImageButton home_button;
     Button detalles_btn;
@@ -48,7 +44,7 @@ public class Verificador_precio extends AppCompatActivity implements SearchView.
     Button agregar_producto_btn;
 
     RecyclerView recyclerView;
-    RecyclerViewAdapter adapter;
+    ProductosAdapter adapter;
     RecyclerView.LayoutManager manager;
 
     FirebaseAuth mAuth;
@@ -57,7 +53,7 @@ public class Verificador_precio extends AppCompatActivity implements SearchView.
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
     DatabaseReference dbProductosReferencia;
-    List<Item> nombresProductos = new ArrayList<>();
+    List<Producto> listaProductos = new ArrayList<>();
 
     ProgressDialog progressDialog;
     SessionManager sessionManager;
@@ -69,7 +65,7 @@ public class Verificador_precio extends AppCompatActivity implements SearchView.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_verificador_precio);
 
-        ControllerRecyclerViewAdapter.itemSeleccionado = null;
+        ControllerRecyclerViewAdapter.productoSeleccionado = null;
 
         dbProductosReferencia = FirebaseDatabase.getInstance().getReference().child("Producto");
 
@@ -77,7 +73,7 @@ public class Verificador_precio extends AppCompatActivity implements SearchView.
 
         recyclerView = findViewById(R.id.lista_productos);
         manager = new LinearLayoutManager(this);
-        adapter = new RecyclerViewAdapter(this, nombresProductos);
+        adapter = new ProductosAdapter(this, listaProductos);
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
 
@@ -86,7 +82,7 @@ public class Verificador_precio extends AppCompatActivity implements SearchView.
         detalles_btn = findViewById(R.id.detalles_btn);
         detalles_btn.setOnClickListener(view -> {
 
-            if (ControllerRecyclerViewAdapter.itemSeleccionado != null) {
+            if (ControllerRecyclerViewAdapter.productoSeleccionado != null) {
                 detallesDeProducto();
 
             } else {
@@ -112,32 +108,11 @@ public class Verificador_precio extends AppCompatActivity implements SearchView.
 
         productoViewModel = new ProductoViewModel(this);
         productoViewModel.getProductos().observe(this, productos -> {
-            for (Producto producto : productos) {
-
-                double lista;
-                double cca;
-                double p1;
-                double p2;
-                double p3;
-                double p4;
-
-                DecimalFormat df = new DecimalFormat("#.00");
-
-                lista = producto.getLista();
-                cca = producto.getCca();
-                p1 = producto.getP1();
-                p2 = producto.getP2();
-                p3 = producto.getP3();
-                p4 = producto.getP4();
-
-                Item item = new Item(producto.getCode(), producto.getNombre(),
-                        producto.getMarca(), df.format(lista),
-                        df.format(cca), df.format(p1), df.format(p2),
-                        df.format(p3), df.format(p4), null);
-                nombresProductos.add(item);
-                adapter.notifyDataSetChanged();
-            }
+            listaProductos.clear();
+            listaProductos.addAll(productos);
+            adapter.notifyDataSetChanged();
         });
+
     }
 
 
@@ -159,7 +134,7 @@ public class Verificador_precio extends AppCompatActivity implements SearchView.
     }
 
     private void irAgregarProductor() {
-        Intent i = new Intent(this, Agregar_producto.class);
+        Intent i = new Intent(this, AgregarProducto.class);
         startActivity(i);
     }
 
@@ -176,17 +151,17 @@ public class Verificador_precio extends AppCompatActivity implements SearchView.
         final TextView marcaTv = viewInflated.findViewById(R.id.marcaTv);
         final ListView preciosLv = viewInflated.findViewById(R.id.preciosLv);
 
-        productoNameTv.setText("PRODUCTO: " + ControllerRecyclerViewAdapter.itemSeleccionado.getTitulo());
-        cotigoTv.setText("CODIGO: " + ControllerRecyclerViewAdapter.itemSeleccionado.getId());
-        marcaTv.setText("MARCA: " + ControllerRecyclerViewAdapter.itemSeleccionado.getDato1());
+        productoNameTv.setText("PRODUCTO: " + ControllerRecyclerViewAdapter.productoSeleccionado.getNombre());
+        cotigoTv.setText("CODIGO: " + ControllerRecyclerViewAdapter.productoSeleccionado.getId());
+        marcaTv.setText("MARCA: " + ControllerRecyclerViewAdapter.productoSeleccionado.getMarca());
 
         ArrayList<String> precios = new ArrayList<>();
-        precios.add("P3: " + ControllerRecyclerViewAdapter.itemSeleccionado.getDato6());
-        precios.add("LISTA: " + ControllerRecyclerViewAdapter.itemSeleccionado.getDato2());
-        precios.add("P1: " + ControllerRecyclerViewAdapter.itemSeleccionado.getDato4());
-        precios.add("P2: " + ControllerRecyclerViewAdapter.itemSeleccionado.getDato5());
-        precios.add("P4: " + ControllerRecyclerViewAdapter.itemSeleccionado.getDato7());
-        precios.add("CCA: " + ControllerRecyclerViewAdapter.itemSeleccionado.getDato3());
+        precios.add("P3: " + ControllerRecyclerViewAdapter.productoSeleccionado.getP3());
+        precios.add("LISTA: " + ControllerRecyclerViewAdapter.productoSeleccionado.getLista());
+        precios.add("P1: " + ControllerRecyclerViewAdapter.productoSeleccionado.getP1());
+        precios.add("P2: " + ControllerRecyclerViewAdapter.productoSeleccionado.getP2());
+        precios.add("P4: " + ControllerRecyclerViewAdapter.productoSeleccionado.getP4());
+        precios.add("CCA: " + ControllerRecyclerViewAdapter.productoSeleccionado.getCca());
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, precios);
         preciosLv.setAdapter(adapter);
@@ -217,7 +192,7 @@ public class Verificador_precio extends AppCompatActivity implements SearchView.
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
-                adapter.setFilter(nombresProductos);
+                adapter.setProductos(listaProductos);
                 adapter.notifyDataSetChanged();
                 return true;
             }
@@ -233,8 +208,8 @@ public class Verificador_precio extends AppCompatActivity implements SearchView.
     @Override
     public boolean onQueryTextChange(String newText) {
         try {
-            ArrayList<Item> listaFiltrada = filter((ArrayList<Item>) nombresProductos, newText);
-            adapter.setFilter(listaFiltrada);
+            ArrayList<Producto> listaFiltrada = filter((ArrayList<Producto>) listaProductos, newText);
+            adapter.setProductos(listaFiltrada);
             adapter.notifyDataSetChanged();
         } catch (Exception e) {
             e.printStackTrace();
@@ -242,14 +217,15 @@ public class Verificador_precio extends AppCompatActivity implements SearchView.
         return false;
     }
 
-    private ArrayList<Item> filter(ArrayList<Item> items, String texto) {
-        ArrayList<Item> listaFiltrada = new ArrayList<>();
+    private ArrayList<Producto> filter(ArrayList<Producto> productos, String texto) {
+        ArrayList<Producto> listaFiltrada = new ArrayList<>();
         try {
             String textoMiniscula = texto.toLowerCase();
-            for (Item item : items) {
-                String itemFilter = item.getTitulo().toLowerCase();
+            for (Producto producto : productos) {
+                assert producto.getNombre() != null;
+                String itemFilter = producto.getNombre().toLowerCase();
                 if (itemFilter.contains(textoMiniscula)) {
-                    listaFiltrada.add(item);
+                    listaFiltrada.add(producto);
                 }
             }
         } catch (Exception e) {

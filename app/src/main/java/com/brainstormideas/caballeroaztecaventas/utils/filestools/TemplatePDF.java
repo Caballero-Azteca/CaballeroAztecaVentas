@@ -1,18 +1,20 @@
-package com.brainstormideas.caballeroaztecaventas.utils.filesTools;
+package com.brainstormideas.caballeroaztecaventas.utils.filestools;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static com.brainstormideas.caballeroaztecaventas.data.models.Pedido.getFolio;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
+import androidx.core.content.res.ResourcesCompat;
+
 import com.brainstormideas.caballeroaztecaventas.R;
 import com.brainstormideas.caballeroaztecaventas.data.models.Pedido;
 import com.brainstormideas.caballeroaztecaventas.ui.PdfViewer;
-import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
@@ -33,6 +35,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 
 public class TemplatePDF extends PdfPageEventHelper {
@@ -63,7 +66,7 @@ public class TemplatePDF extends PdfPageEventHelper {
             Image qrcodeImage = barcodeQRCode.getImage();
             qrcodeImage.setAbsolutePosition(410, 702);
             qrcodeImage.scalePercent(100);
-            pdfWriter = PdfWriter.getInstance(document, new FileOutputStream(pdfFile));
+            pdfWriter = PdfWriter.getInstance(document, Files.newOutputStream(pdfFile.toPath()));
             document.open();
             document.add(qrcodeImage);
             document.add(imagen);
@@ -106,7 +109,9 @@ public class TemplatePDF extends PdfPageEventHelper {
         float[] medidaCeldas = {0.60f, 2.00f};
         pdfTable.setWidths(medidaCeldas);
 
-        Drawable d = context.getResources().getDrawable(R.drawable.logo);
+        Resources resources = context.getResources();
+
+        Drawable d = ResourcesCompat.getDrawable(resources, R.drawable.logo, null);
         BitmapDrawable bitDw = ((BitmapDrawable) d);
         Bitmap bmp = bitDw.getBitmap();
         ByteArrayOutputStream stream = new ByteArrayOutputStream();

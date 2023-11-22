@@ -13,8 +13,6 @@ import androidx.annotation.Nullable;
 import com.brainstormideas.caballeroaztecaventas.data.models.PedidoFolio;
 import com.brainstormideas.caballeroaztecaventas.managers.PedidoManager;
 import com.brainstormideas.caballeroaztecaventas.utils.InternetManager;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -22,9 +20,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
-
-import java.util.List;
+import java.util.Set;
 
 public class MailboxService extends Service {
 
@@ -38,7 +34,7 @@ public class MailboxService extends Service {
     StorageReference subidaPdf;
     StorageReference subidaExcel;
 
-    private static String PEDIDO = "pedido";
+    private static final String PEDIDO = "pedido";
 
     @Override
     public void onCreate() {
@@ -56,10 +52,11 @@ public class MailboxService extends Service {
         System.out.println("SERVICIO DE MAILBOX INICIADO...");
 
         if (intent != null && intent.hasExtra(PEDIDO)) {
-            PedidoFolio pedido = intent.getParcelableExtra(PEDIDO);
 
+            PedidoFolio pedido = intent.getParcelableExtra(PEDIDO);
             pedidoManager.agregarPedido(pedido);
             System.out.println("PEDIDO AGREGADO A LA COLA: " + pedido.getFolio());
+
         }
 
         procesarPedidos();
@@ -69,7 +66,7 @@ public class MailboxService extends Service {
 
     private void procesarPedidos() {
 
-        List<PedidoFolio> pedidos = pedidoManager.getListaPedidos();
+        Set<PedidoFolio> pedidos = pedidoManager.getListaPedidos();
 
         if (isInternetAvailable()) {
 
@@ -80,7 +77,6 @@ public class MailboxService extends Service {
                 Log.e(" ---------   REFERENCIA DEL STORAGE ES: -----------", pedido.getVendedor().getUsuario() + "/" + pedido.getTipo().toUpperCase().charAt(0) + "/" + pedido.getFolio() + "/CAPedido.pdf");
 
                 try {
-                     
                     agregarFolioACliente(pedido);
                     System.out.println("PEDIDO PROCESADO: " + pedido.getFolio());
                 } catch (Exception e) {
@@ -92,39 +88,30 @@ public class MailboxService extends Service {
     }
 
     public void agregarFolioACliente(PedidoFolio pedidoFolio) {
+
         DatabaseReference dbReferencia = getDatabaseReferenceByTipoPedido(pedidoFolio.getTipo());
 
-        // Verificar si el folio ya existe en la base de datos antes de agregarlo
         dbReferencia.orderByChild("folio").equalTo(pedidoFolio.getFolio())
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
                             Log.i("Duplicado", "El folio ya existe en la base de datos.");
+                            pedidoManager.eliminarPedido(pedidoFolio);
                         } else {
-                            // El folio no existe, lo agregamos
-                            dbReferencia.push().setValue(pedidoFolio).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void unused) {
-                                    pedidoManager.eliminarPedido(pedidoFolio);
-                                    if (pedidoFolio.getUriExcel() != null && pedidoFolio.getUriPdf() != null) {
-                                        subirArchivo(subidaPdf, Uri.parse(pedidoFolio.getUriPdf()));
-                                        subirArchivo(subidaExcel, Uri.parse(pedidoFolio.getUriExcel()));
-                                    }
-                                    Log.i("EXITO", "Pedido ${pedidoFolio.getFolio()} enviado con exito.");
+                            dbReferencia.push().setValue(pedidoFolio).addOnSuccessListener(unused -> {
+                                pedidoManager.eliminarPedido(pedidoFolio);
+                                if (pedidoFolio.getUriExcel() != null && pedidoFolio.getUriPdf() != null) {
+                                    subirArchivo(subidaPdf, Uri.parse(pedidoFolio.getUriPdf()));
+                                    subirArchivo(subidaExcel, Uri.parse(pedidoFolio.getUriExcel()));
                                 }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Log.i("EXITO", "Error al enviar ${pedidoFolio.getFolio()}." + e);
-                                }
-                            });
+                                Log.i("EXITO", "Pedido: " + pedidoFolio.getFolio() + " enviado con exito.");
+                            }).addOnFailureListener(e -> Log.i("EXITO", "Error al enviar: " + pedidoFolio.getFolio() + "Error: " + e));
                             Log.e("FOLIO AGREGADO A LA BASE DE DATOS", pedidoFolio.getFolio());
                         }
                     }
-
                     @Override
-                    public void onCancelled(DatabaseError databaseError) {
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
                         Log.e("Error", "Error al verificar duplicados: " + databaseError.getMessage());
                     }
                 });
@@ -133,18 +120,10 @@ public class MailboxService extends Service {
 
     private void subirArchivo(StorageReference storageRef, Uri fileUri) {
         storageRef.putFile(fileUri)
-                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        // Se ha subido el archivo exitosamente
-                    }
+                .addOnSuccessListener(taskSnapshot -> {
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        Toast.makeText(getApplicationContext(), "Error al subir el archivo. Contacte a soporte.", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                .addOnFailureListener(exception ->
+                        Toast.makeText(getApplicationContext(), "Error al subir el archivo. Contacte a soporte.", Toast.LENGTH_SHORT).show());
     }
 
     private DatabaseReference getDatabaseReferenceByTipoPedido(String tipoPedido) {
@@ -164,7 +143,7 @@ public class MailboxService extends Service {
     }
 
     private boolean isInternetAvailable() {
-        return internetManager.isInternetAvaible();
+        return internetManager.isInternetAvailable();
     }
 
     @Nullable

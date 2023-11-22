@@ -25,14 +25,14 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-public class RecyclerViewProductosPedidoAdapter extends RecyclerView.Adapter {
+public class ProductosPedidoAdapter extends RecyclerView.Adapter {
 
     Context context;
     ArrayList<ItemProductoPedido> listItems;
     private ImageButton btnEliminar;
     DatabaseReference dbProductosReferencia;
 
-    public RecyclerViewProductosPedidoAdapter(Context context, ArrayList<ItemProductoPedido> listItems) {
+    public ProductosPedidoAdapter(Context context, ArrayList<ItemProductoPedido> listItems) {
         this.context = context;
         this.listItems = listItems;
     }

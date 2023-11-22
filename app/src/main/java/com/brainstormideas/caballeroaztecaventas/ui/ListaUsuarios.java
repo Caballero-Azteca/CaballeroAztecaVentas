@@ -5,7 +5,6 @@ import static com.brainstormideas.caballeroaztecaventas.ui.MainActivity.isInitia
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -16,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.brainstormideas.caballeroaztecaventas.R;
 import com.brainstormideas.caballeroaztecaventas.entidad.ItemUsuario;
-import com.brainstormideas.caballeroaztecaventas.ui.adapters.RecyclerViewUsuariosAdapter;
+import com.brainstormideas.caballeroaztecaventas.ui.adapters.UsuariosAdapter;
 import com.brainstormideas.caballeroaztecaventas.utils.SessionManager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.FirebaseApp;
@@ -30,10 +29,10 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-public class Lista_usuarios extends AppCompatActivity {
+public class ListaUsuarios extends AppCompatActivity {
 
     RecyclerView recyclerView;
-    RecyclerViewUsuariosAdapter adapter;
+    UsuariosAdapter adapter;
     RecyclerView.LayoutManager manager;
 
     Button atrasBtn;
@@ -62,7 +61,7 @@ public class Lista_usuarios extends AppCompatActivity {
         sessionManager = new SessionManager(this);
         recyclerView = findViewById(R.id.lista_usuarios_scroll);
         manager = new LinearLayoutManager(this);
-        adapter = new RecyclerViewUsuariosAdapter(this, nombresVendedores);
+        adapter = new UsuariosAdapter(this, nombresVendedores);
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
 
@@ -139,7 +138,7 @@ public class Lista_usuarios extends AppCompatActivity {
 
     private void irAgregarUsuario() {
         if (sessionManager.getUsuario().equals("admin")) {
-            Intent i = new Intent(this, Agregar_usuario.class);
+            Intent i = new Intent(this, AgregarUsuario.class);
             startActivity(i);
         } else {
             Toast.makeText(getApplicationContext(), "Usted no es el administrador del sistema.", Toast.LENGTH_LONG).show();
@@ -148,7 +147,7 @@ public class Lista_usuarios extends AppCompatActivity {
     }
 
     private void refrescar() {
-        Intent i = new Intent(Lista_usuarios.this, Lista_usuarios.class);
+        Intent i = new Intent(ListaUsuarios.this, ListaUsuarios.class);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(i);
     }

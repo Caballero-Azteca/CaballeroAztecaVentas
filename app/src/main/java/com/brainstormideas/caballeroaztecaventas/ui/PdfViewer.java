@@ -50,7 +50,7 @@ public class PdfViewer extends AppCompatActivity {
     }
 
     public void volver() {
-        Intent i = new Intent(getApplicationContext(), Menu_final.class);
+        Intent i = new Intent(getApplicationContext(), MenuFinal.class);
         i.putExtra("tipoCliente", "cliente");
         i.putExtra("candadoModificar", candadoModificar);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);

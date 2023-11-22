@@ -1,4 +1,4 @@
-package com.brainstormideas.caballeroaztecaventas.utils.filesTools;
+package com.brainstormideas.caballeroaztecaventas.utils.filestools;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;

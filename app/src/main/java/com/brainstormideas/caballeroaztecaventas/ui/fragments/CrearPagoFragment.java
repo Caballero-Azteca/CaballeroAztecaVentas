@@ -37,12 +37,15 @@ import com.brainstormideas.caballeroaztecaventas.ui.adapters.PagosAdapter;
 import com.brainstormideas.caballeroaztecaventas.ui.viewmodels.CobroViewModel;
 import com.brainstormideas.caballeroaztecaventas.ui.viewmodels.PagoViewModel;
 
+import org.apache.poi.xssf.util.NumericRanges;
+
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -72,6 +75,9 @@ public class CrearPagoFragment extends DialogFragment {
     private String idUnico;
 
     private PagosAdapter pagosAdapter;
+    ArrayList<Cobro> cobrosClienteEspecifico = new ArrayList<>();
+    private HashMap<String, Double> importesCobros = new HashMap<>();
+
 
 
     @Override
@@ -103,9 +109,17 @@ public class CrearPagoFragment extends DialogFragment {
 
         pagoViewModel = new PagoViewModel(getContext());
 
+        cargarFacturas();
+        obtenerIdUnico();
+
+        facturaAdapter = new FacturaSpinnerAdapter(requireContext(), android.R.layout.simple_spinner_item);
+        facturaAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerFactura.setAdapter(facturaAdapter);
+
         spinnerTipoPago.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+
                 tipoPagoSeleccionado = (String) parentView.getItemAtPosition(position);
 
                 editTextNumeroCheque.setVisibility(View.GONE);
@@ -122,7 +136,6 @@ public class CrearPagoFragment extends DialogFragment {
                     editTextNumeroTranferencia.setVisibility(View.GONE);
                     editTextBanco.setVisibility(View.GONE);
                 }
-
             }
 
             @Override
@@ -130,16 +143,19 @@ public class CrearPagoFragment extends DialogFragment {
 
             }
         });
-        cargarFacturas();
-        obtenerIdUnico();
-        facturaAdapter = new FacturaSpinnerAdapter(requireContext(), android.R.layout.simple_spinner_item);
-        facturaAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerFactura.setAdapter(facturaAdapter);
+
 
         spinnerFactura.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 facturaSeleccionada = (String) adapterView.getItemAtPosition(i);
+                Double montoAPagar = importesCobros.get(facturaSeleccionada);
+
+                if (montoAPagar != null) {
+                    editTextImporte.setText(String.valueOf(montoAPagar));
+                } else {
+                    editTextImporte.setText("0");
+                }
             }
 
             @Override
@@ -166,20 +182,26 @@ public class CrearPagoFragment extends DialogFragment {
     }
 
     private void subirPagos(){
-        try {
-            for (Pago pago : pagos) {
-                pagoViewModel.insertPago(pago);
+        if(!pagos.isEmpty()){
+            try {
+                for (Pago pago : pagos) {
+                    pagoViewModel.insertPago(pago);
+                }
+                pagar();
+                limpiarCampos();
+                Toast.makeText(requireContext(), "Pagos agregados", Toast.LENGTH_SHORT).show();
+                this.dismiss();
+            } catch (Exception e) {
+                Toast.makeText(requireContext(), "Error al agregar los pagos: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
             }
-            limpiarCampos();
-            Toast.makeText(requireContext(), "Pagos agregados", Toast.LENGTH_SHORT).show();
-            this.dismiss();
-        } catch (Exception e) {
-            Toast.makeText(requireContext(), "Error al agregar los pagos: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
+        } else {
+            Toast.makeText(requireContext(), "Agrega pagos primero", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void insertarPago() {
+
         if(rellenarPago() != null){
             pagos.add(rellenarPago());
             pagosAdapter.notifyDataSetChanged();
@@ -198,6 +220,7 @@ public class CrearPagoFragment extends DialogFragment {
     private Pago rellenarPago() {
 
         String factura = facturaSeleccionada;
+        Double montoAPagar = importesCobros.get(facturaSeleccionada);
         String banco = editTextBanco.getText().toString();
         String importeStr = editTextImporte.getText().toString().trim();
         String numeroCheque = editTextNumeroCheque.getText().toString();
@@ -212,6 +235,11 @@ public class CrearPagoFragment extends DialogFragment {
             return null;
         }
 
+        if((tipoPagoSeleccionado.equals(CHEQUE) || tipoPagoSeleccionado.equals(TRANSFERENCIA)) && banco.isEmpty()){
+            Toast.makeText(getContext(), "Debe agregar el nombre del banco", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
         double importe;
         try {
             NumberFormat numberFormat = NumberFormat.getInstance(Locale.getDefault());
@@ -219,6 +247,11 @@ public class CrearPagoFragment extends DialogFragment {
             importe = number.doubleValue();
         } catch (ParseException | NumberFormatException e) {
             Toast.makeText(requireContext(), "Importe inválido", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        if (importe>montoAPagar) {
+            Toast.makeText(requireContext(), "Importe es mayor al necesario", Toast.LENGTH_SHORT).show();
             return null;
         }
 
@@ -258,27 +291,77 @@ public class CrearPagoFragment extends DialogFragment {
 
     private void cargarFacturas() {
         cobroViewModel.getCobros().observe(this, cobrosNuevos -> {
-            ArrayList<String> cobrosClienteEspecifico = new ArrayList<>();
+            ArrayList<String> cobrosClienteEspecificoFactura = new ArrayList<>();
+            importesCobros.clear();
             for (Cobro cobro : cobrosNuevos) {
                 if (cobro.getCodigoCliente() != null && cobro.getCodigoCliente().equals(cliente.getCode())) {
-                    cobrosClienteEspecifico.add(cobro.getFactura());
+                    cobrosClienteEspecifico.add(cobro);
+                    cobrosClienteEspecificoFactura.add(cobro.getFactura());
+                    importesCobros.put(cobro.getFactura(), cobro.getImportePorPagar());
                 }
             }
             facturas.clear();
             facturaAdapter.clear();
-            facturas.addAll(cobrosClienteEspecifico);
+            facturas.addAll(cobrosClienteEspecificoFactura);
             facturaAdapter.actualizarFacturas(facturas);
         });
     }
 
     private void obtenerIdUnico() {
-
         UUID nuevoUuid = UUID.randomUUID();
-
         String idUnicoGenera = String.valueOf(nuevoUuid).substring(19);
         idUnico = idUnicoGenera;
     }
 
+    private void pagar(){
 
+        for (Cobro cobro : cobrosClienteEspecifico) {
 
+            String facturaCobro = cobro.getFactura();
+            for (Pago pago : pagos) {
+                String facturaPago = pago.getFactura();
+
+                if (facturaCobro.equals(facturaPago)) {
+                    actualizarFactura(cobro, pago.getImporte());
+                }
+            }
+        }
+    }
+
+    public void actualizarFactura(Cobro cobro, double nuevoImporte) {
+        // Obtén el importe actual del cobro
+        double importeCobro = cobro.getImporteFactura();
+
+        // Verifica si la resta resulta en un importe no negativo
+        if (importeCobro >= nuevoImporte) {
+            // Calcula el nuevo importe del cobro restando el nuevoImporte
+            double nuevoImporteCobro = importeCobro - nuevoImporte;
+
+            // Calcula el nuevo importe por pagar
+            double importePorPagar = nuevoImporteCobro - cobro.getAbono();
+
+            // Calcula el nuevo saldo
+            double saldo = cobro.getImporteFactura() - importePorPagar;
+
+            double abono = cobro.getAbono() + nuevoImporte;
+
+            // Validar que las cantidades no sean negativas
+            if (nuevoImporteCobro >= 0 && importePorPagar >= 0 && saldo >= 0) {
+
+                cobro.setImporteFactura(nuevoImporteCobro);
+                cobro.setImportePorPagar(importePorPagar);
+                cobro.setSaldo(saldo);
+                cobro.setAbono(abono);
+
+                // Actualiza el cobro utilizando el ViewModel
+                cobroViewModel.updateCobro(cobro);
+            } else {
+                Toast.makeText(getContext(), "Error: Los importes no pueden ser negativos", Toast.LENGTH_SHORT).show();
+                throw new RuntimeException("El nuevo importe no puede ser negativo");
+            }
+        } else {
+            Toast.makeText(getContext(), "El pago excede el monto del importe", Toast.LENGTH_SHORT).show();
+            throw new RuntimeException("El nuevo importe no puede ser negativo");
+        }
+    }
 }

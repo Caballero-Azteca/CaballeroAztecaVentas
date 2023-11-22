@@ -12,17 +12,29 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class PedidoManager {
 
     private static PedidoManager instance;
-    private final List<PedidoFolio> listaPedidos;
+    private final Set<PedidoFolio> listaPedidos;
     private final SharedPreferences sharedPreferences;
     private final Object lock = new Object();
 
     private PedidoManager(Context context) {
-        listaPedidos = new ArrayList<>();
+        listaPedidos = new HashSet<>();
         sharedPreferences = context.getSharedPreferences("PedidoManagerPrefs", Context.MODE_PRIVATE);
         cargarPedidosGuardados();
     }
@@ -35,51 +47,53 @@ public class PedidoManager {
     }
 
     private synchronized void cargarPedidosGuardados() {
-
         synchronized (lock) {
-
-            System.out.println("CARGANDO PEDIDOS.... DESDE PEDIDOS MANAGER");
-
             String pedidosJson = sharedPreferences.getString("pedidos", null);
             if (pedidosJson != null) {
                 Gson gson = new GsonBuilder()
                         .registerTypeAdapter(Uri.class, new UriTypeAdapter())
                         .create();
-                Type type = new TypeToken<List<PedidoFolio>>() {
+                Type type = new TypeToken<Set<PedidoFolio>>() {
                 }.getType();
-                List<PedidoFolio> pedidosGuardados = gson.fromJson(pedidosJson, type);
+                Set<PedidoFolio> pedidosGuardados = gson.fromJson(pedidosJson, type);
                 if (pedidosGuardados != null) {
                     listaPedidos.addAll(pedidosGuardados);
                 }
             }
-            System.out.println("PEDIDOS GUARDADOS: " + listaPedidos.size());
         }
     }
 
-
-    public synchronized List<PedidoFolio> getListaPedidos() {
+    public synchronized Set<PedidoFolio> getListaPedidos() {
         synchronized (lock) {
-            return new ArrayList<>(listaPedidos);
+            return new HashSet<>(listaPedidos);
         }
     }
-
 
     public void setListaPedidos(List<PedidoFolio> listaPedidos) {
         synchronized (lock) {
             if (listaPedidos != null) {
-                for (PedidoFolio pedido : listaPedidos) {
-                    if (!this.listaPedidos.contains(pedido)) {
-                        this.listaPedidos.add(pedido);
-                    }
-                }
+                this.listaPedidos.addAll(listaPedidos);
                 guardarPedidos();
             }
         }
     }
 
     private void guardarPedidos() {
-
         synchronized (lock) {
+
+            Set<String> folios = new HashSet<>();
+            List<PedidoFolio> listaActualizada = new ArrayList<>();
+
+            for (PedidoFolio pedido : listaPedidos) {
+                if (!folios.contains(pedido.getFolio())) {
+                    folios.add(pedido.getFolio());
+                    listaActualizada.add(pedido);
+                }
+            }
+
+            listaPedidos.clear();
+            listaPedidos.addAll(listaActualizada);
+
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(Uri.class, new UriTypeAdapter())
                     .create();
@@ -104,31 +118,37 @@ public class PedidoManager {
         }
     }
 
-    public int getUltimoFolioPedidos() {
+    public String getUltimoFolioPedidos() {
         synchronized (lock) {
-            return sharedPreferences.getInt("ultimoFolioPedidos", 0);
+            return sharedPreferences.getString("ultimoFolioPedidos", "N/A");
         }
     }
 
-    public int getUltimoFolioCotizaciones() {
+    public String getUltimoFolioCotizaciones() {
         synchronized (lock) {
-            return sharedPreferences.getInt("ultimoFolioCotizaciones", 0);
+            return sharedPreferences.getString("ultimoFolioCotizaciones", "N/A");
         }
     }
 
-    public void guardarUltimoFolioPedidos(int ultimoFolio) {
+    public void guardarUltimoFolioPedidos(String ultimoFolio) {
         synchronized (lock) {
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putInt("ultimoFolioPedidos", ultimoFolio);
-            editor.apply();
+            String ultimoFolioGuardado = sharedPreferences.getString("ultimoFolioPedidos", "N/A");
+            if (ultimoFolio != ultimoFolioGuardado) {
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("ultimoFolioPedidos", ultimoFolio);
+                editor.apply();
+            }
         }
     }
 
-    public void guardarUltimoFolioCotizaciones(int ultimoFolio) {
+    public void guardarUltimoFolioCotizaciones(String ultimoFolio) {
         synchronized (lock) {
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putInt("ultimoFolioCotizaciones", ultimoFolio);
-            editor.apply();
+            String ultimoFolioGuardado = sharedPreferences.getString("ultimoFolioCotizaciones", "N/A");
+            if (ultimoFolio != ultimoFolioGuardado) {
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("ultimoFolioCotizaciones", ultimoFolio);
+                editor.apply();
+            }
         }
     }
 }

@@ -3,7 +3,6 @@ package com.brainstormideas.caballeroaztecaventas.ui;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -14,12 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.brainstormideas.caballeroaztecaventas.R;
 import com.brainstormideas.caballeroaztecaventas.data.models.Cliente;
 import com.brainstormideas.caballeroaztecaventas.data.models.Pedido;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
-public class Agregar_cliente extends AppCompatActivity {
+public class AgregarCliente extends AppCompatActivity {
 
     EditText r_razon_txt;
     EditText r_rfc_txt;
@@ -112,7 +107,7 @@ public class Agregar_cliente extends AppCompatActivity {
             progressDialog.dismiss();
             limpiarCampos();
 
-            Intent i = new Intent(this, Menu_pedidos.class);
+            Intent i = new Intent(this, MenuPedidos.class);
             i.putExtra("tipoCliente", "clienteExpress");
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
                     Intent.FLAG_ACTIVITY_CLEAR_TASK |

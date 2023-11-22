@@ -1,40 +1,66 @@
 package com.brainstormideas.caballeroaztecaventas.data.models;
 
-public class Folio {
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
-    private String folio;
-    private String fecha;
+import java.io.Serializable;
+import java.util.List;
+
+@Entity(tableName = "folios")
+public class Folio implements Serializable {
+
+    @PrimaryKey
+    @NonNull
+    private Long id;
+    @NonNull
+    private String indice;
+    @NonNull
+    private List<String> folios;
 
     public Folio() {
 
     }
 
-    public Folio(String folio, String fecha) {
-        this.folio = folio;
-        this.fecha = fecha;
+    public Folio(@NonNull Long id, @NonNull String indice, @NonNull List<String> folios) {
+        this.id = id;
+        this.indice = indice;
+        this.folios = folios;
     }
 
-    public String getFolio() {
-        return folio;
+    @NonNull
+    public Long getId() {
+        return id;
     }
 
-    public void setFolio(String folio) {
-        this.folio = folio;
+    public void setId(@NonNull Long id) {
+        this.id = id;
     }
 
-    public String getFecha() {
-        return fecha;
+    @NonNull
+    public String getIndice() {
+        return indice;
     }
 
-    public void setFecha(String fecha) {
-        this.fecha = fecha;
+    public void setIndice(@NonNull String indice) {
+        this.indice = indice;
+    }
+
+    @NonNull
+    public List<String> getFolios() {
+        return folios;
+    }
+
+    public void setFolios(@NonNull List<String> folios) {
+        this.folios = folios;
     }
 
     @Override
     public String toString() {
         return "Folio{" +
-                "folio='" + folio + '\'' +
-                ", fecha='" + fecha + '\'' +
+                "id=" + id +
+                ", indice='" + indice + '\'' +
+                ", folios=" + folios +
                 '}';
     }
 }

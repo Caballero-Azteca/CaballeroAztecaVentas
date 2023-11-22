@@ -1,7 +1,5 @@
 package com.brainstormideas.caballeroaztecaventas.ui;
 
-import static com.brainstormideas.caballeroaztecaventas.ui.MainActivity.isInitialized;
-
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -31,7 +29,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.MenuItemCompat;
@@ -43,32 +40,24 @@ import com.brainstormideas.caballeroaztecaventas.data.models.Cliente;
 import com.brainstormideas.caballeroaztecaventas.data.models.Pedido;
 import com.brainstormideas.caballeroaztecaventas.data.models.Producto;
 import com.brainstormideas.caballeroaztecaventas.data.models.Vendedor;
-import com.brainstormideas.caballeroaztecaventas.entidad.Item;
 import com.brainstormideas.caballeroaztecaventas.entidad.ItemProductoPedido;
-import com.brainstormideas.caballeroaztecaventas.managers.PedidoManager;
 import com.brainstormideas.caballeroaztecaventas.ui.adapters.ControllerRecyclerViewAdapter;
-import com.brainstormideas.caballeroaztecaventas.ui.adapters.RecyclerViewAdapter;
-import com.brainstormideas.caballeroaztecaventas.ui.adapters.RecyclerViewProductosPedidoAdapter;
+import com.brainstormideas.caballeroaztecaventas.ui.adapters.ProductosAdapter;
+import com.brainstormideas.caballeroaztecaventas.ui.adapters.ProductosPedidoAdapter;
+import com.brainstormideas.caballeroaztecaventas.ui.viewmodels.FolioViewModel;
 import com.brainstormideas.caballeroaztecaventas.ui.viewmodels.ProductoViewModel;
 import com.brainstormideas.caballeroaztecaventas.ui.viewmodels.VendedorViewModel;
 import com.brainstormideas.caballeroaztecaventas.utils.InternetManager;
 import com.brainstormideas.caballeroaztecaventas.utils.SessionManager;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQueryTextListener {
+public class MenuPedidos extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
     ImageButton home_button;
     TextView cliente_view;
@@ -82,10 +71,6 @@ public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQuer
     Button limpiar_btn;
     Button finalizar_pedido;
 
-    RecyclerViewProductosPedidoAdapter adapter;
-    RecyclerView recyclerView;
-    RecyclerView.LayoutManager manager;
-
     DatabaseReference dbProductosReferencia;
     DatabaseReference dbVendedoresReferencia;
     DatabaseReference dbFoliosReferencia;
@@ -94,7 +79,7 @@ public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQuer
     ArrayAdapter<CharSequence> spinnerAdapter;
 
     String productoSeleccionado;
-    Boolean seleccionable;
+    boolean seleccionable;
     String tipoCliente;
 
     int pedido;
@@ -109,24 +94,23 @@ public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQuer
 
     ProgressDialog progressDialog;
 
-    private ProductoViewModel productoViewModel;
+    ProductosPedidoAdapter adapter;
+    RecyclerView recyclerView;
+    RecyclerView.LayoutManager manager;
 
+    private ProductoViewModel productoViewModel;
     private RecyclerView recyclerViewBusqueda;
-    private RecyclerViewAdapter adapterBusqueda;
+    private ProductosAdapter adapterBusqueda;
     private RecyclerView.LayoutManager managerBusqueda;
+    List<Producto> listaProductosBusqueda = new ArrayList<>();
     private LinearLayout container;
 
     private ProgressBar progressBar;
 
-    List<Item> listaProductosBusqueda = new ArrayList<>();
-
     private InternetManager internetManager;
 
     private VendedorViewModel vendedorViewModel;
-
-    private interface FolioCallback {
-        void onFolioObtained(int folio);
-    }
+    private FolioViewModel folioViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,10 +125,10 @@ public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQuer
 
         this.setTitle("Buscar producto");
 
-        initializedFirebaseService();
-
         LayoutInflater inflater = getLayoutInflater();
         View inflatedView = inflater.inflate(R.layout.products_result, null);
+
+        progressDialog = new ProgressDialog(this);
 
         container = findViewById(R.id.lista_busqueda_productos);
         container.addView(inflatedView);
@@ -154,7 +138,7 @@ public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQuer
 
         recyclerViewBusqueda = container.findViewById(R.id.productos_busqueda);
         recyclerViewBusqueda.setLayoutManager(managerBusqueda);
-        adapterBusqueda = new RecyclerViewAdapter(this, listaProductosBusqueda);
+        adapterBusqueda = new ProductosAdapter(this, listaProductosBusqueda);
         recyclerViewBusqueda.setAdapter(adapterBusqueda);
         container.setVisibility(View.GONE);
 
@@ -162,46 +146,18 @@ public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQuer
 
         // Load Products with ViewModel
         productoViewModel = new ProductoViewModel(this);
-        productoViewModel.getProductos().observe(this, productos -> {
-            for (Producto producto : productos) {
-
-                double lista;
-                double cca;
-                double p1;
-                double p2;
-                double p3;
-                double p4;
-
-                DecimalFormat df = new DecimalFormat("#.00");
-
-                lista = producto.getLista();
-                cca = producto.getCca();
-                p1 = producto.getP1();
-                p2 = producto.getP2();
-                p3 = producto.getP3();
-                p4 = producto.getP4();
-
-                Item item = new Item(producto.getCode(), producto.getNombre(),
-                        producto.getMarca(), df.format(lista),
-                        df.format(cca), df.format(p1), df.format(p2),
-                        df.format(p3), df.format(p4), null);
-                listaProductosBusqueda.add(item);
-            }
-            progressBar.setVisibility(View.GONE);
-            adapterBusqueda.notifyDataSetChanged();
-        });
+        cargarProductos();
 
         // Recyclerview de productos agregados
 
         manager = new LinearLayoutManager(this);
         recyclerView = findViewById(R.id.productos_listados);
         recyclerView.setLayoutManager(manager);
-        adapter = new RecyclerViewProductosPedidoAdapter(this, Pedido.getListaDeProductos());
+        adapter = new ProductosPedidoAdapter(this, Pedido.getListaDeProductos());
         recyclerView.setAdapter(adapter);
 
         tipoCliente = getIntent().getExtras().get("tipoCliente").toString();
         seleccionable = getIntent().getBooleanExtra("seleccionable", false);
-        progressDialog = new ProgressDialog(this);
 
         dbProductosReferencia = FirebaseDatabase.getInstance().getReference().child("Producto");
         dbVendedoresReferencia = FirebaseDatabase.getInstance().getReference().child("Usuario");
@@ -214,10 +170,13 @@ public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQuer
             vendedor = vendedorObtained;
             System.out.println("USUARIO ACTUAL: " + vendedor.getUsuario());
             Pedido.setVendedor(vendedor);
-            if (vendedor != null && (Pedido.getFolio() == null || Pedido.getFolio().isEmpty())) {
-                generarFolio();
+            if(Pedido.getFolio() != null && Pedido.getFolio().isEmpty()){
+                //TODO Fix el tipo de pedido como variable
+                obtenerFolio(vendedor.getUsuario(), "P");
             }
         });
+
+        folioViewModel = new FolioViewModel(this);
 
         cliente_view = findViewById(R.id.cliente_view);
         if (obtenerCliente() != null) {
@@ -240,16 +199,12 @@ public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQuer
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
+                // TODO document why this method is empty
             }
         });
 
         home_button = findViewById(R.id.home_button);
-        home_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                back();
-            }
-        });
+        home_button.setOnClickListener(view -> back());
 
         codigo_tv = findViewById(R.id.codigo_tv);
 
@@ -309,7 +264,7 @@ public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQuer
             if (actionId == EditorInfo.IME_ACTION_DONE
                     || keyEvent.getAction() == KeyEvent.ACTION_DOWN
                     || keyEvent.getAction() == KeyEvent.KEYCODE_ENTER) {
-                if (!cantidad_tv.getText().equals("")) {
+                if (!cantidad_tv.getText().toString().equals("")) {
                     obtenerProducto(codigo_tv.getText().toString());
                     inputMethodManager.hideSoftInputFromWindow(codigo_tv.getWindowToken(), 0);
                 } else {
@@ -346,7 +301,7 @@ public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQuer
                     || keyEvent.getAction() == KeyEvent.ACTION_DOWN
                     || keyEvent.getAction() == KeyEvent.KEYCODE_ENTER) {
 
-                if (!cantidad_tv.getText().equals("")) {
+                if (!cantidad_tv.getText().toString().equals("")) {
                     obtenerProducto(codigo_tv.getText().toString());
                     inputMethodManager.hideSoftInputFromWindow(cantidad_tv.getWindowToken(), 0);
                 } else {
@@ -358,20 +313,26 @@ public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQuer
             }
             return false;
         });
-
     }
 
-    private void initializedFirebaseService() {
-        try {
-            if (!isInitialized) {
-                FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-                isInitialized = true;
-            } else {
-                Log.d("ATENCION-FIREBASE:", "Already Initialized");
+    private void cargarProductos() {
+
+        productoViewModel.getProductos().observe(this, productos -> {
+
+            int oldSize = listaProductosBusqueda.size();
+            listaProductosBusqueda.clear();
+            listaProductosBusqueda.addAll(productos);
+            int newSize = listaProductosBusqueda.size();
+
+            adapterBusqueda.notifyItemRangeChanged(0, Math.min(oldSize, newSize));
+            if (newSize > oldSize) {
+                adapterBusqueda.notifyItemRangeInserted(oldSize, newSize - oldSize);
+            } else if (newSize < oldSize) {
+                adapterBusqueda.notifyItemRangeRemoved(newSize, oldSize - newSize);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+            progressBar.setVisibility(View.GONE);
+        });
     }
 
     private Cliente obtenerCliente() {
@@ -447,25 +408,26 @@ public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQuer
             Toast.makeText(getApplicationContext(), "Debe ingresar un código y una cantidad de productos.", Toast.LENGTH_LONG).show();
             progressDialog.dismiss();
         }
+    }
 
+    private void obtenerFolio(String indice, String tipoPedido) {
+        folioViewModel.getHighestFolio(indice, tipoPedido).observe(this, Pedido::setFolio);
     }
 
     private void finalizarPedido() {
 
         Pedido.setTotal(calcularTotal());
 
-        if (Pedido.getListaDeProductos() != null && Pedido.getListaDeProductos().size() != 0) {
+        if (Pedido.getListaDeProductos() != null && !Pedido.getListaDeProductos().isEmpty()) {
             vendedorViewModel.getVendedor(sessionManager.getEmail()).observe(this, vendedorObtained -> {
                 vendedor = vendedorObtained;
-                System.out.println("USUARIO ACTUAL: " + vendedor.getUsuario());
                 Pedido.setVendedor(vendedor);
                 if (vendedor != null && (Pedido.getFolio() == null || Pedido.getFolio().isEmpty())) {
                     Pedido.setVendedor(vendedor);
-                    generarFolio();
                 }
             });
-            if(!Pedido.getFolio().isEmpty()){
-                Intent i = new Intent(getApplicationContext(), Menu_final.class);
+            if (!Pedido.getFolio().isEmpty()) {
+                Intent i = new Intent(getApplicationContext(), MenuFinal.class);
                 i.putExtra("tipoCliente", tipoCliente);
                 i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                 i.putExtra("candadoModificar", true);
@@ -479,127 +441,14 @@ public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQuer
     }
 
     public void clear() {
-
         int size = Pedido.getListaDeProductos().size();
         if (size > 0) {
             Pedido.getListaDeProductos().subList(0, size).clear();
             synchronized (Pedido.getListaDeProductos()) {
-                Pedido.getListaDeProductos().notify();
-                adapter.notifyDataSetChanged();
+                Pedido.getListaDeProductos().notifyAll();
+                adapter.notifyItemRangeRemoved(0, size);
             }
         }
-    }
-
-    public void limpiarPedido() {
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Limpiar pedido");
-        builder.setMessage("Se eliminaran todos los productos agregados a la lista.");
-        builder.setPositiveButton("Aceptar", (dialog, which) -> clear());
-        builder.setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss());
-        builder.show();
-
-        adapter.notifyDataSetChanged();
-    }
-
-    public void clearProductoInfo() {
-        codigo_tv.setText("");
-        cantidad_tv.setText("");
-    }
-
-    private void generarFolio() {
-        String tipo = "";
-
-        if (Pedido.getTipo().equals("pedido")) {
-            tipo = "P";
-        } else if (Pedido.getTipo().equals("cotizacion")) {
-            tipo = "C";
-        }
-
-        String folioGenerado = Pedido.getVendedor().getUsuario();
-
-        // Obtiene el folio de forma asíncrona
-        String finalTipo = tipo;
-        obtenerFolio().thenAccept(folioPedido -> {
-            // Una vez que se haya obtenido el folio, actualiza la interfaz de usuario
-            String folioPedidoStr = String.format(Locale.getDefault(), "%04d", folioPedido);
-            Pedido.setFolio(finalTipo + folioGenerado + "-" + folioPedidoStr);
-        });
-    }
-
-    private CompletableFuture<Integer> obtenerFolio() {
-        CompletableFuture<Integer> future = new CompletableFuture<>();
-
-        String tipoPedido = Pedido.getTipo();
-        int ultimoPedido = PedidoManager.getInstance(getApplicationContext()).getUltimoFolioPedidos();
-        int ultimoCotizacion = PedidoManager.getInstance(getApplicationContext()).getUltimoFolioCotizaciones();
-
-        System.out.println("ULTIMO FOLIO: " + ultimoPedido);
-        System.out.println("ENTRANDO A OBTENER MAYOR FOLIO....");
-
-        if (tipoPedido.equals("pedido")) {
-            if (isInternetAvailable()) {
-                DatabaseReference referencia = dbFoliosReferencia;
-                obtenerMayorFolio(referencia, "P", folioObtained -> {
-                    future.complete(folioObtained); // Completa el CompletableFuture con el resultado
-                    PedidoManager.getInstance(getApplicationContext()).guardarUltimoFolioPedidos(folioObtained);
-                    System.out.println("EL ULTIMO FOLIO GUARDADO ES: " + folioObtained);
-                });
-            } else {
-                future.complete(ultimoPedido + 1);// Completa el CompletableFuture con el resultado
-                PedidoManager.getInstance(getApplicationContext()).guardarUltimoFolioPedidos(ultimoPedido + 1);
-            }
-        } else if (tipoPedido.equals("cotizacion")) {
-            if (isInternetAvailable()) {
-                DatabaseReference referencia = dbCotizacionesReferencia;
-                obtenerMayorFolio(referencia, "C", folioObtained -> {
-                    future.complete(folioObtained); // Completa el CompletableFuture con el resultado
-                    PedidoManager.getInstance(getApplicationContext()).guardarUltimoFolioCotizaciones(folioObtained);
-                });
-            } else {
-                future.complete(ultimoCotizacion + 1); // Completa el CompletableFuture con el resultado
-                PedidoManager.getInstance(getApplicationContext()).guardarUltimoFolioCotizaciones(ultimoCotizacion + 1);
-            }
-        }
-
-        return future; // Devuelve el CompletableFuture
-    }
-
-    public void obtenerMayorFolio(@NonNull DatabaseReference referencia, String tipo, FolioCallback callback) {
-
-        System.out.println("OBTENIENDO FOLIO MAYOR......");
-
-        AtomicBoolean isListenerAdded = new AtomicBoolean(false);
-
-        Query query = referencia.orderByChild("folio")
-                .startAt(tipo + vendedor.getUsuario())
-                .endAt(tipo + vendedor.getUsuario() + "\uf8ff");
-
-        query.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                int mayor = 0;
-                int pedido;
-
-                for (DataSnapshot data : snapshot.getChildren()) {
-                    String folioValue = data.child("folio").getValue().toString();
-                    int actual = Integer.parseInt(folioValue.split("-")[1].substring(0, 4));
-                    mayor = Math.max(mayor, actual);
-                }
-
-                if (!isListenerAdded.getAndSet(true)) {
-                    pedido = mayor + 1;
-                    callback.onFolioObtained(pedido);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                // En caso de error, llamamos al callback con un valor indicativo de error
-                callback.onFolioObtained(-1);
-            }
-        });
     }
 
     public String calcularTotal() {
@@ -648,7 +497,7 @@ public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQuer
 
     private void back() {
 
-        if (Pedido.getListaDeProductos().size() != 0) {
+        if (Pedido.getListaDeProductos().isEmpty()) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Ir a lista de clientes");
             builder.setMessage("¿Desea cancelar su pedido?");
@@ -661,15 +510,8 @@ public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQuer
                             Intent.FLAG_ACTIVITY_CLEAR_TASK |
                             Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
-                } else if (tipoCliente.equals("clienteRegistrado") || tipoCliente.equals("clienteExpress")) {
-                    Intent intent = new Intent(getApplicationContext(), Lista_clientes.class);
-                    intent.putExtra("tipoCliente", tipoCliente);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
-                            Intent.FLAG_ACTIVITY_CLEAR_TASK |
-                            Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
                 } else {
-                    Intent intent = new Intent(getApplicationContext(), Lista_clientes.class);
+                    Intent intent = new Intent(getApplicationContext(), ListaClientes.class);
                     intent.putExtra("tipoCliente", tipoCliente);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
                             Intent.FLAG_ACTIVITY_CLEAR_TASK |
@@ -677,7 +519,8 @@ public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQuer
                     startActivity(intent);
                 }
             });
-            builder.setNegativeButton("NO", (dialogInterface, i) -> {});
+            builder.setNegativeButton("NO", (dialogInterface, i) -> {
+            });
             builder.show();
         } else {
             Pedido.setObservaciones(null);
@@ -689,14 +532,14 @@ public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQuer
                         Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
             } else if (tipoCliente.equals("clienteRegistrado")) {
-                Intent intent = new Intent(getApplicationContext(), Lista_clientes.class);
+                Intent intent = new Intent(getApplicationContext(), ListaClientes.class);
                 intent.putExtra("tipoCliente", tipoCliente);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
                         Intent.FLAG_ACTIVITY_CLEAR_TASK |
                         Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
             } else {
-                Intent intent = new Intent(getApplicationContext(), Lista_clientes.class);
+                Intent intent = new Intent(getApplicationContext(), ListaClientes.class);
                 intent.putExtra("tipoCliente", "clienteRegistrado");
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
                         Intent.FLAG_ACTIVITY_CLEAR_TASK |
@@ -723,7 +566,7 @@ public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQuer
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
                 container.setVisibility(View.VISIBLE);
-                ControllerRecyclerViewAdapter.itemSeleccionado = null;
+                ControllerRecyclerViewAdapter.productoSeleccionado = null;
                 adapterBusqueda.notifyDataSetChanged();
                 return true;
             }
@@ -731,12 +574,12 @@ public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQuer
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 container.setVisibility(View.GONE);
-                if (!cantidad_tv.getText().equals("") && ControllerRecyclerViewAdapter.itemSeleccionado != null) {
-                    obtenerProducto(ControllerRecyclerViewAdapter.itemSeleccionado.getId());
+                if (!cantidad_tv.getText().equals("") && ControllerRecyclerViewAdapter.productoSeleccionado != null) {
+                    obtenerProducto(ControllerRecyclerViewAdapter.productoSeleccionado.getCode());
                 } else if (cantidad_tv.getText().equals("")) {
                     Toast.makeText(getApplicationContext(), "Ingresar cantidad.", Toast.LENGTH_SHORT).show();
                 }
-                adapterBusqueda.setFilter(listaProductosBusqueda);
+                adapterBusqueda.setProductos(listaProductosBusqueda);
                 adapterBusqueda.notifyDataSetChanged();
                 return true;
             }
@@ -753,8 +596,8 @@ public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQuer
     public boolean onQueryTextChange(String newText) {
         recyclerViewBusqueda.setVisibility(View.VISIBLE);
         try {
-            ArrayList<Item> listaFiltrada = filter((ArrayList<Item>) listaProductosBusqueda, newText);
-            adapterBusqueda.setFilter(listaFiltrada);
+            ArrayList<Producto> listaFiltrada = filter((ArrayList<Producto>) listaProductosBusqueda, newText);
+            adapterBusqueda.setProductos(listaFiltrada);
             adapterBusqueda.notifyDataSetChanged();
         } catch (Exception e) {
             e.printStackTrace();
@@ -762,14 +605,14 @@ public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQuer
         return false;
     }
 
-    private ArrayList<Item> filter(ArrayList<Item> items, String texto) {
-        ArrayList<Item> listaFiltrada = new ArrayList<>();
+    private ArrayList<Producto> filter(ArrayList<Producto> items, String texto) {
+        ArrayList<Producto> listaFiltrada = new ArrayList<>();
         try {
             String textoMiniscula = texto.toLowerCase();
-            for (Item item : items) {
-                String itemFilter = item.getTitulo().toLowerCase();
+            for (Producto producto : items) {
+                String itemFilter = producto.getNombre().toLowerCase();
                 if (itemFilter.contains(textoMiniscula)) {
-                    listaFiltrada.add(item);
+                    listaFiltrada.add(producto);
                 }
             }
         } catch (Exception e) {
@@ -778,7 +621,20 @@ public class Menu_pedidos extends AppCompatActivity implements SearchView.OnQuer
         return listaFiltrada;
     }
 
-    private boolean isInternetAvailable() {
-        return internetManager.isInternetAvaible();
+    public void limpiarPedido() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Limpiar pedido");
+        builder.setMessage("Se eliminarán todos los productos agregados a la lista.");
+        builder.setPositiveButton("Aceptar", (dialog, which) -> {
+            clear();
+            adapter.notifyDataSetChanged();
+        });
+        builder.setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss());
+        builder.show();
+    }
+
+    public void clearProductoInfo() {
+        codigo_tv.setText("");
+        cantidad_tv.setText("");
     }
 }

@@ -119,8 +119,37 @@ public class CobroRepository {
         cobroDAO.deleteCobro(cobro);
     }
 
-    public void updateCobro(Cobro cobro) {
-        cobroDAO.updateCobro(cobro);
+    public CompletableFuture<Void> updateCobro(Cobro cobro) {
+
+        CompletableFuture<Void> localUpdateFuture = CompletableFuture.runAsync(() -> {
+            cobroDAO.updateCobro(cobro);
+        });
+
+        CompletableFuture<Void> firebaseUpdateFuture = new CompletableFuture<>();
+        Query query = cobroRef.orderByChild("factura").equalTo(cobro.getFactura());
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    Cobro firebaseCobro = snapshot.getValue(Cobro.class);
+                    if (firebaseCobro != null && firebaseCobro.getFactura().equals(cobro.getFactura())) {
+                        snapshot.getRef().setValue(cobro)
+                                .addOnSuccessListener(aVoid -> {
+                                    firebaseUpdateFuture.complete(null);
+                                })
+                                .addOnFailureListener(firebaseUpdateFuture::completeExceptionally);
+                        break;
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                firebaseUpdateFuture.completeExceptionally(databaseError.toException());
+            }
+        });
+
+        return CompletableFuture.allOf(localUpdateFuture, firebaseUpdateFuture);
     }
 }
 

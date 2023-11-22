@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
@@ -33,7 +32,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.Objects;
 
-public class Agregar_usuario extends AppCompatActivity {
+public class AgregarUsuario extends AppCompatActivity {
 
     private EditText nombre_txt;
     private EditText user_txt;
@@ -64,7 +63,6 @@ public class Agregar_usuario extends AppCompatActivity {
         setContentView(R.layout.activity_agregar_usuario);
 
         getSupportActionBar().setTitle("AGREGAR VENDEDOR");
-        initializedFirebaseService();
 
         firebaseDatabase = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference();
@@ -106,6 +104,9 @@ public class Agregar_usuario extends AppCompatActivity {
                 case R.id.vendedor_rb:
                     permisos = "vendedor";
                     break;
+                default:
+                    permisos = "vendedor";
+                    break;
             }
         });
 
@@ -114,19 +115,6 @@ public class Agregar_usuario extends AppCompatActivity {
 
         obtenerNumeroDeUsuarios();
 
-    }
-
-    private void initializedFirebaseService() {
-        try {
-            if (!isInitialized) {
-                FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-                isInitialized = true;
-            } else {
-                Log.d("ATENCION-FIREBASE:", "Already Initialized");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     private void registrarUsuario() {
@@ -200,7 +188,7 @@ public class Agregar_usuario extends AppCompatActivity {
                         mAuth.setLanguageCode("es");
                         user.sendEmailVerification();
 
-                        AlertDialog.Builder builder = new AlertDialog.Builder(Agregar_usuario.this);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(AgregarUsuario.this);
                         builder.setCancelable(false);
                         builder.setTitle("Registro exitoso.");
                         builder.setMessage("Se ha registrado exitosamente a Caballero Azteca Ventas. \n\nSe ha enviado un correo electrónico a su cuenta para verificar el mismo. Gracias!");
@@ -237,7 +225,7 @@ public class Agregar_usuario extends AppCompatActivity {
     }
 
     private void volver() {
-        Intent intent = new Intent(this, Lista_usuarios.class);
+        Intent intent = new Intent(this, ListaUsuarios.class);
         startActivity(intent);
     }
 
@@ -266,7 +254,7 @@ public class Agregar_usuario extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                //TODO Por el momento no hay ninguna accion
             }
         });
     }

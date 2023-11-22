@@ -25,16 +25,17 @@ import com.brainstormideas.caballeroaztecaventas.data.models.Pedido;
 import com.brainstormideas.caballeroaztecaventas.data.models.PedidoFolio;
 import com.brainstormideas.caballeroaztecaventas.managers.PedidoManager;
 import com.brainstormideas.caballeroaztecaventas.services.MailboxService;
-import com.brainstormideas.caballeroaztecaventas.ui.Lista_clientes;
-import com.brainstormideas.caballeroaztecaventas.ui.Lista_usuarios;
+import com.brainstormideas.caballeroaztecaventas.ui.ListaClientes;
+import com.brainstormideas.caballeroaztecaventas.ui.ListaUsuarios;
 import com.brainstormideas.caballeroaztecaventas.ui.Login;
 import com.brainstormideas.caballeroaztecaventas.ui.MailManager;
 import com.brainstormideas.caballeroaztecaventas.ui.QrScanner;
-import com.brainstormideas.caballeroaztecaventas.ui.Verificador_precio;
+import com.brainstormideas.caballeroaztecaventas.ui.VerificadorPrecio;
 import com.brainstormideas.caballeroaztecaventas.ui.adapters.FolioAdapter;
 import com.brainstormideas.caballeroaztecaventas.utils.InternetManager;
 import com.brainstormideas.caballeroaztecaventas.utils.SessionManager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -73,6 +74,8 @@ public class MainScreen extends Fragment {
 
     private PedidoManager pedidoManager;
     private static String PEDIDO = "pedido";
+
+    AlertDialog customAlertDialog;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -116,13 +119,13 @@ public class MainScreen extends Fragment {
         }
         usuarioActual_txt = view.findViewById(R.id.rfc_etx);
         cnx_state = view.findViewById(R.id.cnx_state);
-        cnx_state.setText("MODO: Online. 5.4.1");
+        cnx_state.setText("MODO: Online. 5.5.1");
 
         String usuarioActualTexto = "Usuario: " + session.getName();
         usuarioActual_txt.setText(usuarioActualTexto);
 
         internetManager = new InternetManager(requireContext());
-        if (!internetManager.isInternetAvaible()) {
+        if (!internetManager.isInternetAvailable()) {
             internetNoDisponibleAviso();
         }
 
@@ -131,7 +134,7 @@ public class MainScreen extends Fragment {
         pedido_btn = view.findViewById(R.id.pedido_btn);
         cotizacion_btn = view.findViewById(R.id.cotizacion_btn);
         bandeja_btn = view.findViewById(R.id.bandeja_button);
-        //cobranza_btn = view.findViewById(R.id.cobranza_botton);
+        cobranza_btn = view.findViewById(R.id.cobranza_botton);
         refresh_float_btn = view.findViewById(R.id.refresh_float_btn);
 
         verificador_precio = view.findViewById(R.id.verificador_precio_button);
@@ -145,26 +148,37 @@ public class MainScreen extends Fragment {
 
         bandeja_btn.setOnClickListener(view12 -> irABandejaDeFolios());
 
-        //cobranza_btn.setOnClickListener(v -> irACobranza());
+        cobranza_btn.setOnClickListener(v -> irACobranza());
 
         refresh_float_btn.setOnClickListener(view13 -> {
-            Intent intent = new Intent(getContext(), MailboxService.class);
-            getContext().startService(intent);
 
-            List<PedidoFolio> listaActualizadaPedidos = PedidoManager.getInstance(getContext()).getListaPedidos();
-            if (listaActualizadaPedidos != null) {
-                List<String> foliosString = new ArrayList<>();
-                for (PedidoFolio pedido : listaActualizadaPedidos) {
-                    foliosString.add(pedido.getFolio());
+            Set<PedidoFolio> listaActualizadaPedidos = PedidoManager.getInstance(getContext()).getListaPedidos();
+
+            if(!listaActualizadaPedidos.isEmpty()){
+                refresh_float_btn.setEnabled(false);
+                Snackbar.make(view13, "Procesando folios, por favor espera...", Snackbar.LENGTH_LONG).show();
+
+                Intent intent = new Intent(getContext(), MailboxService.class);
+                getContext().startService(intent);
+
+                if (listaActualizadaPedidos != null) {
+                    List<String> foliosString = new ArrayList<>();
+                    for (PedidoFolio pedido : listaActualizadaPedidos) {
+                        foliosString.add(pedido.getFolio());
+                    }
+                    folios.clear();
+                    folios.addAll(foliosString);
+                    adapter.notifyDataSetChanged();
+                } else {
+                    folios.clear();
+                    adapter.notifyDataSetChanged();
+                    getContext().stopService(intent);
                 }
-                folios.clear();
-                folios.addAll(foliosString);
-                adapter.notifyDataSetChanged();
+                refresh_float_btn.setEnabled(true);
             } else {
-                folios.clear();
-                adapter.notifyDataSetChanged();
-                getContext().stopService(intent);
+
             }
+
         });
 
         volver_menu_btn.setOnClickListener(view14 -> bandeja_container.setVisibility(View.GONE));
@@ -187,7 +201,7 @@ public class MainScreen extends Fragment {
         final String[] tiposCliente = new String[]{"Cliente existente", "Cliente express"};
         final int[] checkedItem = {-1};
 
-        if(!pedidoManager.getListaPedidos().isEmpty() && internetManager.isInternetAvaible()){
+        if(internetManager.isInternetAvailable() && !pedidoManager.getListaPedidos().isEmpty()){
             AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
             builder.setTitle("Buzon lleno");
             builder.setMessage("Ya posee conexion a internet y el buzon tiene aun pedidos en cola.");
@@ -212,7 +226,7 @@ public class MainScreen extends Fragment {
                 }
             });
             builder.setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss());
-            AlertDialog customAlertDialog = builder.create();
+            customAlertDialog = builder.create();
             customAlertDialog.show();
         }
     }
@@ -230,29 +244,29 @@ public class MainScreen extends Fragment {
     }
 
     private void irVerificadorDePrecio() {
-        Intent i = new Intent(requireContext(), Verificador_precio.class);
+        Intent i = new Intent(requireContext(), VerificadorPrecio.class);
         startActivity(i);
     }
 
     private void irMenuClienteExistente() {
-        Intent i = new Intent(requireContext(), Lista_clientes.class);
+        Intent i = new Intent(requireContext(), ListaClientes.class);
         startActivity(i);
 
     }
 
     private void irMenuClienteNuevo() {
-        Intent i = new Intent(requireContext(), Lista_clientes.class);
+        Intent i = new Intent(requireContext(), ListaClientes.class);
         startActivity(i);
     }
 
     private void irAMostrarUsuarios() {
-        Intent i = new Intent(requireContext(), Lista_usuarios.class);
+        Intent i = new Intent(requireContext(), ListaUsuarios.class);
         startActivity(i);
     }
 
     private void irABandejaDeFolios() {
 
-        List<PedidoFolio> pedidoFolios = PedidoManager.getInstance(getContext()).getListaPedidos();
+        Set<PedidoFolio> pedidoFolios = PedidoManager.getInstance(getContext()).getListaPedidos();
 
         Set<String> foliosSet = new HashSet<>(); // Utilizamos un conjunto para evitar duplicados
 
@@ -317,7 +331,15 @@ public class MainScreen extends Fragment {
     }
 
     public void internetNoDisponibleAviso() {
-        cnx_state.setText("MODO: Offline. 5.4.1");
+        cnx_state.setText("MODO: Offline. 5.5.1");
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (customAlertDialog != null && customAlertDialog.isShowing()) {
+            customAlertDialog.dismiss();
+        }
+    }
 }

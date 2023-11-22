@@ -3,12 +3,15 @@ package com.brainstormideas.caballeroaztecaventas.ui.fragments;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.SpannableString;
+import android.text.style.TextAppearanceSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,7 +57,15 @@ public class PagosFragment extends Fragment {
             cliente = (Cliente) args.getSerializable("cliente");
         }
 
-        activity.getSupportActionBar().setTitle("PAGOS - " + cliente.getRazon());
+        ActionBar actionBar = activity.getSupportActionBar();
+
+        if (activity != null) {
+            if (actionBar != null) {
+                SpannableString spannableString = new SpannableString("PAGOS - " + cliente.getRazon());
+                spannableString.setSpan(new TextAppearanceSpan(activity, R.style.ActionBarTextStyle), 0, spannableString.length(), 0);
+                actionBar.setTitle(spannableString);
+            }
+        }
 
         back_btn = view.findViewById(R.id.back_btn);
         agregarPago_btn = view.findViewById(R.id.agregarPago_btn);

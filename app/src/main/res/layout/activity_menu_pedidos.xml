@@ -6,7 +6,7 @@
     android:layout_gravity="center"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:context=".ui.Menu_pedidos">
+    tools:context=".ui.MenuPedidos">
 
     <LinearLayout
         android:id="@+id/lista_busqueda_productos"

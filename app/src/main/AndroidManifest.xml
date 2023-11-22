@@ -26,11 +26,11 @@
         <activity android:name=".ui.PdfViewer" />
         <activity android:name=".ui.QrScanner" />
         <activity
-            android:name=".ui.Agregar_producto"
+            android:name=".ui.AgregarProducto"
             android:windowSoftInputMode="adjustPan" />
-        <activity android:name=".ui.Agregar_usuario"
+        <activity android:name=".ui.AgregarUsuario"
                   android:windowSoftInputMode="adjustPan"/>
-        <activity android:name=".ui.Lista_usuarios" />
+        <activity android:name=".ui.ListaUsuarios" />
         <activity
             android:name=".ui.MainActivity"
             android:screenOrientation="portrait">
@@ -40,21 +40,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.Pantalla_pedido_finalizado" />
-        <activity android:name=".ui.Menu_final" />
+        <activity android:name=".ui.PantallaPedidoFinalizado" />
+        <activity android:name=".ui.MenuFinal" />
         <activity
-            android:name=".ui.Menu_pedidos"
+            android:name=".ui.MenuPedidos"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".ui.Lista_clientes"
+            android:name=".ui.ListaClientes"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".ui.Agregar_cliente"
+            android:name=".ui.AgregarCliente"
             android:windowSoftInputMode="adjustPan" />
-        <activity android:name=".ui.Menu_marca" />
+        <activity android:name=".ui.MenuMarca" />
         <activity android:name=".ui.Marcas" />
         <activity
-            android:name=".ui.Verificador_precio"
+            android:name=".ui.VerificadorPrecio"
             android:windowSoftInputMode="adjustPan" />
         <activity android:name=".ui.Login" />
 

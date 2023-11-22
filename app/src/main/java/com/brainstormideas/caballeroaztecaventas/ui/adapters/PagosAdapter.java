@@ -35,8 +35,14 @@ public class PagosAdapter extends RecyclerView.Adapter<PagosAdapter.PagoViewHold
         holder.factura.setText("Factura: " + pago.getFactura());
         holder.importe.setText("Importe: " + String.valueOf(pago.getImporte()));
         holder.fecha.setText("Fecha: " + pago.getFecha());
-        holder.banco.setText("Banco: " + pago.getBanco());
         holder.tipoPago.setText("Tipo de Pago: " + pago.getTipoPago());
+
+        if (pago.getBanco() != null) {
+            holder.banco.setText("Banco: " + pago.getBanco());
+            holder.banco.setVisibility(View.VISIBLE);
+        } else {
+            holder.banco.setVisibility(View.GONE);
+        }
     }
 
     @Override

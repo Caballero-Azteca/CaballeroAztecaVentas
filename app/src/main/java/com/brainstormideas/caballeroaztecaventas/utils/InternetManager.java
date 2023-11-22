@@ -7,17 +7,21 @@ import android.net.NetworkInfo;
 
 public class InternetManager {
 
-    Context context;
+    private Context context;
 
     public InternetManager(Context context) {
         this.context = context;
     }
 
-    public boolean isInternetAvaible() {
+    public boolean isInternetAvailable() {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        assert connectivityManager != null;
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        return networkInfo != null && networkInfo.isConnected();
-    }
 
+        if (connectivityManager != null) {
+            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+            return networkInfo != null && networkInfo.isConnected();
+        }
+
+        return false;
+    }
 }
+

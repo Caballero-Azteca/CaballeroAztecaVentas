@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:context=".ui.Menu_marca">
+    tools:context=".ui.MenuMarca">
 
 
     <androidx.recyclerview.widget.RecyclerView

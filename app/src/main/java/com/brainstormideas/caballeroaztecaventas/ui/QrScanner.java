@@ -53,8 +53,6 @@ public class QrScanner extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_qr_scanner);
 
-        initializedFirebaseService();
-
         dbClientesReferencia = FirebaseDatabase.getInstance().getReference().child("Cliente");
         progressDialog = new ProgressDialog(this);
 
@@ -67,19 +65,6 @@ public class QrScanner extends AppCompatActivity {
         });
         cameraView = findViewById(R.id.surface_camera);
         initQR();
-    }
-
-    private void initializedFirebaseService() {
-        try {
-            if (!isInitialized) {
-                FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-                isInitialized = true;
-            } else {
-                Log.d("ATENCION-FIREBASE:", "Already Initialized");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     public void initQR() {
@@ -232,7 +217,7 @@ public class QrScanner extends AppCompatActivity {
                                     numeroInterior, cp, telefono, email, ruta, agenteVenta, agenteCobro);
 
                             Pedido.setCliente(cliente);
-                            Intent i = new Intent(getApplicationContext(), Menu_pedidos.class);
+                            Intent i = new Intent(getApplicationContext(), MenuPedidos.class);
                             i.putExtra("seleccionable", false);
                             i.putExtra("tipoCliente", "clienteEscaneado");
                             startActivity(i);
@@ -297,7 +282,7 @@ public class QrScanner extends AppCompatActivity {
                                     numeroInterior, cp, telefono, email, ruta, agenteVenta, agenteCobro);
 
                             Pedido.setCliente(cliente);
-                            Intent i = new Intent(getApplicationContext(), Menu_pedidos.class);
+                            Intent i = new Intent(getApplicationContext(), MenuPedidos.class);
                             i.putExtra("seleccionable", false);
                             i.putExtra("tipoCliente", "clienteEscaneado");
                             startActivity(i);
